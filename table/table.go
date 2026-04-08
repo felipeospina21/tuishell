@@ -233,8 +233,15 @@ func (m *Model) SetCursor(n int) {
 
 // View renders the component.
 func (m Model) View() string {
-	if len(m.viewport.View()) == 0 {
-		return EmptyMsg.Width(m.W).Height(m.H).Render(m.EmptyMessage)
+	if len(m.rows) == 0 {
+		w, h := m.W, m.H
+		if w == 0 {
+			w = m.viewport.Width()
+		}
+		if h == 0 {
+			h = m.viewport.Height()
+		}
+		return EmptyMsg.Width(w).Height(h).Render(m.EmptyMessage)
 	}
 	return m.headersView() + "\n" + m.viewport.View()
 }

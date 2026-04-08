@@ -5,7 +5,6 @@ import (
 	"image/color"
 
 	"charm.land/bubbles/v2/help"
-	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/felipeospina21/tuishell"
@@ -34,9 +33,10 @@ type Model struct {
 	Content      string
 	Width        int
 	ProjectLabel string
-	Spinner      spinner.Model
+	SpinnerView  string
 	Help         help.Model
 	Keybinds     help.KeyMap
+	devMode      bool
 	theme        style.Theme
 }
 
@@ -49,31 +49,21 @@ func New(theme style.Theme, devMode bool, keybinds help.KeyMap) Model {
 	return Model{
 		Status:   status,
 		Keybinds: keybinds,
-		Spinner: spinner.New(
-			spinner.WithSpinner(spinner.Dot),
-			spinner.WithStyle(SpinnerStyle(theme)),
-		),
-		Help:  help.New(),
-		theme: theme,
+		Help:     help.New(),
+		devMode:  devMode,
+		theme:    theme,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	return m.Spinner.Tick
+	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case spinner.TickMsg:
-		m.Spinner, cmd = m.Spinner.Update(msg)
-		return m, cmd
-	case tea.WindowSizeMsg:
+	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.Width = msg.Width
-		return m, nil
-	default:
-		return m, cmd
 	}
+	return m, nil
 }
 
 func (m Model) View() string {
@@ -83,11 +73,18 @@ func (m Model) View() string {
 
 	modeColor := m.modeBackground()
 	statusKey := statusStyle(t).Background(modeColor).Render(m.Status)
+	
+	// Show spinner next to mode label when loading
+	spinnerView := ""
+	if m.Status == ModesEnum.Loading && m.SpinnerView != "" {
+		spinnerView = " " + m.SpinnerView
+	}
+	
 	statusVal := statusText(t).Render(tuishell.Truncate(m.Content, width/4))
 	encoding := encodingStyle(t).Render("UTF-8")
 	projectName := projectStyle(t).Render(m.ProjectLabel)
 
-	helpWidth := width - w(statusKey) - w(statusVal) - w(encoding) - w(projectName) - 2
+	helpWidth := width - w(statusKey) - w(spinnerView) - w(statusVal) - w(encoding) - w(projectName) - 2
 	if helpWidth < 0 {
 		helpWidth = 0
 	}
@@ -98,6 +95,7 @@ func (m Model) View() string {
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		statusKey,
+		spinnerView,
 		statusVal,
 		helpView,
 		encoding,

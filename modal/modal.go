@@ -28,8 +28,16 @@ func New(ctx *tuishell.AppContext, theme style.Theme) Model {
 // View renders the modal box centered over the dimmed background.
 func (m Model) View(background string) string {
 	t := m.theme
-	w := m.ctx.Window.Width
-	h := m.ctx.Window.Height
+	// Use actual background dimensions for proper centering
+	bgLines := strings.Split(background, "\n")
+	w := lipgloss.Width(background)
+	h := len(bgLines)
+	if w == 0 {
+		w = m.ctx.Window.Width
+	}
+	if h == 0 {
+		h = m.ctx.Window.Height
+	}
 
 	modalW := modalSize(w)
 	modalH := modalSize(h)
@@ -59,10 +67,11 @@ func (m Model) View(background string) string {
 		MaxHeight(contentH).
 		Render(content)
 
-	rendered := box.Width(modalW).Render(
+	rendered := box.Width(modalW).Height(modalH).Render(
 		lipgloss.JoinVertical(0, header, body, footer),
 	)
 
+	// Dim the background and overlay the modal
 	dim := dimStyle(t)
 	dimmed := dimContent(dim, background, w, h)
 	return placeOverlay(dim, w, h, rendered, dimmed)

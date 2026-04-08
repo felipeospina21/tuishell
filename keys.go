@@ -20,9 +20,22 @@ var CommonKeys = []key.Binding{
 	GlobalKeys(false).ToggleLeftPanel, GlobalKeys(false).OpenModal, GlobalKeys(false).Help, GlobalKeys(false).Quit,
 }
 
-func (k GlobalKeyMap) ShortHelp() []key.Binding { return CommonKeys }
+// DevKeys are additional keybindings shown in dev mode.
+var DevKeys = []key.Binding{
+	GlobalKeys(true).ThrowError, GlobalKeys(true).MockFetch,
+}
+
+func (k GlobalKeyMap) ShortHelp() []key.Binding {
+	if k.ThrowError.Enabled() {
+		return append(CommonKeys, DevKeys...)
+	}
+	return CommonKeys
+}
 
 func (k GlobalKeyMap) FullHelp() [][]key.Binding {
+	if k.ThrowError.Enabled() {
+		return [][]key.Binding{append(CommonKeys, DevKeys...)}
+	}
 	return [][]key.Binding{CommonKeys}
 }
 

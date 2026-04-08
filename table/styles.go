@@ -39,3 +39,25 @@ func DocStyle(t style.Theme) lipgloss.Style {
 		BorderStyle(lipgloss.RoundedBorder()).
 		BorderForeground(t.Border)
 }
+
+// RenderTable renders a table view wrapped in DocStyle.
+func RenderTable(t style.Theme, tableView string) string {
+	return DocStyle(t).Render(tableView)
+}
+
+// RenderPanel renders a table panel with loading state and optional header.
+// Header is only shown when the table has rows.
+func RenderPanel(t style.Theme, tbl *Model, loading bool, spinnerView, header string) string {
+	if loading {
+		return lipgloss.NewStyle().
+			Width(tbl.W).
+			Height(tbl.H).
+			Align(lipgloss.Center, lipgloss.Center).
+			Render(spinnerView + " Loading...")
+	}
+	tableView := DocStyle(t).Render(tbl.View())
+	if len(tbl.Rows()) == 0 {
+		return tableView
+	}
+	return lipgloss.JoinVertical(0, TitleStyle(t).Render(header), tableView)
+}
