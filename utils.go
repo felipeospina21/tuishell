@@ -1,5 +1,3 @@
-// Package tuishell provides a reusable 3-panel TUI layout engine, shared context,
-// global keybindings, and utility functions for bubbletea applications.
 package tuishell
 
 import "fmt"
