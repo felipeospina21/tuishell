@@ -5,6 +5,7 @@ import (
 	"github.com/felipeospina21/tuishell"
 )
 
+// KeyMap defines the keybindings for the modal overlay.
 type KeyMap struct {
 	Close  key.Binding
 	Submit key.Binding
@@ -12,16 +13,19 @@ type KeyMap struct {
 	tuishell.GlobalKeyMap
 }
 
+// ShortHelp returns the keybindings for the short help view.
 func (k KeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{k.Close, k.Submit, k.Copy, k.Quit}
 }
 
+// FullHelp returns the keybindings for the full help view.
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Close, k.Submit, k.Copy, k.Quit},
 	}
 }
 
+// Keybinds is the default set of modal keybindings.
 var Keybinds = KeyMap{
 	Close: key.NewBinding(
 		key.WithKeys("esc"),

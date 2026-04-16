@@ -15,6 +15,7 @@ type (
 	ResetHighlightMsg = tuishell.ResetHighlightMsg
 )
 
+// Update handles key presses for close, submit, and copy actions.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:

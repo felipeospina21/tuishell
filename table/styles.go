@@ -30,7 +30,7 @@ func TitleStyle(t style.Theme) lipgloss.Style {
 		Bold(true)
 }
 
-// EmptyMsg is the style for the empty table message.
+// EmptyMsg is the style applied when the table has no rows.
 var EmptyMsg = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center)
 
 // DocStyle is the outer border style for the table container.

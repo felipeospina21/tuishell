@@ -1,3 +1,4 @@
+// Package hub provides an app launcher that hosts multiple tuishell applications.
 package hub
 
 import (
@@ -24,8 +25,13 @@ type AppEntry struct {
 	NewModel    func() tea.Model
 }
 
-func (a AppEntry) Title() string       { return a.Name }
+// Title returns the app name for the list display.
+func (a AppEntry) Title() string { return a.Name }
+
+// Description returns the app description for the list display.
 func (a AppEntry) Description() string { return a.Desc }
+
+// FilterValue returns the filterable value for the list.
 func (a AppEntry) FilterValue() string { return a.Name }
 
 // Model is the hub launcher that switches between a picker and child apps.
@@ -70,10 +76,12 @@ func New(apps []AppEntry) Model {
 	}
 }
 
+// Init returns nil; the hub has no initial command.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles input and routes messages to the picker or active child app.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -124,6 +132,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// View renders the picker or the active child app.
 func (m Model) View() tea.View {
 	if m.active == appView && m.child != nil {
 		return m.child.View()

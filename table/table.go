@@ -154,12 +154,23 @@ func New(opts ...Option) Model {
 	return m
 }
 
-func WithColumns(cols []Column) Option  { return func(m *Model) { m.cols = cols } }
-func WithRows(rows []Row) Option        { return func(m *Model) { m.rows = rows } }
-func WithFocused(f bool) Option         { return func(m *Model) { m.focus = f } }
-func WithStyles(s Styles) Option        { return func(m *Model) { m.styles = s } }
-func WithStyleFunc(f StyleFunc) Option  { return func(m *Model) { m.styleFunc = f } }
-func WithKeyMap(km KeyMap) Option       { return func(m *Model) { m.KeyMap = km } }
+// WithColumns sets the table columns.
+func WithColumns(cols []Column) Option { return func(m *Model) { m.cols = cols } }
+
+// WithRows sets the table rows.
+func WithRows(rows []Row) Option { return func(m *Model) { m.rows = rows } }
+
+// WithFocused sets the initial focus state.
+func WithFocused(f bool) Option { return func(m *Model) { m.focus = f } }
+
+// WithStyles sets the table styles.
+func WithStyles(s Styles) Option { return func(m *Model) { m.styles = s } }
+
+// WithStyleFunc sets a custom style function for cell rendering.
+func WithStyleFunc(f StyleFunc) Option { return func(m *Model) { m.styleFunc = f } }
+
+// WithKeyMap sets the table keybindings.
+func WithKeyMap(km KeyMap) Option { return func(m *Model) { m.KeyMap = km } }
 
 // WithHeight sets the height of the table.
 func WithHeight(h int) Option {
@@ -202,30 +213,53 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) Focused() bool   { return m.focus }
-func (m *Model) Focus()         { m.focus = true; m.UpdateViewport() }
-func (m *Model) Blur()          { m.focus = false; m.UpdateViewport() }
+// Focused reports whether the table has focus.
+func (m Model) Focused() bool { return m.focus }
+
+// Focus sets the table to focused state and updates the viewport.
+func (m *Model) Focus() { m.focus = true; m.UpdateViewport() }
+
+// Blur removes focus from the table and updates the viewport.
+func (m *Model) Blur() { m.focus = false; m.UpdateViewport() }
+
+// SelectedRow returns the currently selected row, or nil if no rows exist.
 func (m Model) SelectedRow() Row {
 	if m.cursor < 0 || m.cursor >= len(m.rows) {
 		return nil
 	}
 	return m.rows[m.cursor]
 }
-func (m Model) Rows() []Row       { return m.rows }
+// Rows returns all table rows.
+func (m Model) Rows() []Row { return m.rows }
+
+// Columns returns all table columns.
 func (m Model) Columns() []Column { return m.cols }
-func (m Model) Height() int       { return m.viewport.Height() }
-func (m Model) Width() int        { return m.viewport.Width() }
-func (m Model) Cursor() int       { return m.cursor }
 
-func (m *Model) SetRows(r []Row)       { m.rows = r; m.UpdateViewport() }
+// Height returns the viewport height.
+func (m Model) Height() int { return m.viewport.Height() }
+
+// Width returns the viewport width.
+func (m Model) Width() int { return m.viewport.Width() }
+
+// Cursor returns the index of the currently selected row.
+func (m Model) Cursor() int { return m.cursor }
+
+// SetRows replaces the table rows and updates the viewport.
+func (m *Model) SetRows(r []Row) { m.rows = r; m.UpdateViewport() }
+
+// SetColumns replaces the table columns and updates the viewport.
 func (m *Model) SetColumns(c []Column) { m.cols = c; m.UpdateViewport() }
-func (m *Model) SetWidth(w int)        { m.viewport.SetWidth(w); m.UpdateViewport() }
 
+// SetWidth sets the viewport width and updates the viewport.
+func (m *Model) SetWidth(w int) { m.viewport.SetWidth(w); m.UpdateViewport() }
+
+// SetHeight sets the viewport height (minus header) and updates the viewport.
 func (m *Model) SetHeight(h int) {
 	m.viewport.SetHeight(h - lipgloss.Height(m.headersView()))
 	m.UpdateViewport()
 }
 
+// SetCursor moves the cursor to row n, clamped to valid bounds.
 func (m *Model) SetCursor(n int) {
 	m.cursor = tuishell.Clamp(n, 0, len(m.rows)-1)
 	m.UpdateViewport()
@@ -271,17 +305,22 @@ func (m *Model) UpdateViewport() {
 	)
 }
 
+// MoveUp moves the cursor up by n rows.
 func (m *Model) MoveUp(n int) {
 	m.cursor = tuishell.Clamp(m.cursor-n, 0, len(m.rows)-1)
 	m.UpdateViewport()
 }
 
+// MoveDown moves the cursor down by n rows.
 func (m *Model) MoveDown(n int) {
 	m.cursor = tuishell.Clamp(m.cursor+n, 0, len(m.rows)-1)
 	m.UpdateViewport()
 }
 
-func (m *Model) GotoTop()    { m.MoveUp(m.cursor) }
+// GotoTop moves the cursor to the first row.
+func (m *Model) GotoTop() { m.MoveUp(m.cursor) }
+
+// GotoBottom moves the cursor to the last row.
 func (m *Model) GotoBottom() { m.MoveDown(len(m.rows)) }
 
 // FromValues creates table rows from a delimited string.

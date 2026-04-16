@@ -25,6 +25,7 @@ var DevKeys = []key.Binding{
 	GlobalKeys(true).ThrowError, GlobalKeys(true).MockFetch,
 }
 
+// ShortHelp returns the keybindings for the short help view.
 func (k GlobalKeyMap) ShortHelp() []key.Binding {
 	if k.ThrowError.Enabled() {
 		return append(CommonKeys, DevKeys...)
@@ -32,6 +33,7 @@ func (k GlobalKeyMap) ShortHelp() []key.Binding {
 	return CommonKeys
 }
 
+// FullHelp returns the keybindings for the full help view.
 func (k GlobalKeyMap) FullHelp() [][]key.Binding {
 	if k.ThrowError.Enabled() {
 		return [][]key.Binding{append(CommonKeys, DevKeys...)}
