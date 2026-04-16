@@ -248,13 +248,21 @@ func (m Model) View() string {
 
 // UpdateViewport updates the list content based on the previously defined columns and rows.
 func (m *Model) UpdateViewport() {
-	renderedRows := make([]string, 0, len(m.rows))
-	if m.cursor >= 0 {
-		m.start = tuishell.Clamp(m.cursor-m.viewport.Height(), 0, m.cursor)
-	} else {
-		m.start = 0
+	visibleRows := m.viewport.Height() / (rowHeight + rowBottomMargin)
+	if visibleRows < 1 {
+		visibleRows = 1
 	}
-	m.end = tuishell.Clamp(m.cursor+m.viewport.Height(), m.cursor, len(m.rows))
+
+	// Keep cursor visible within the window
+	if m.cursor < m.start {
+		m.start = m.cursor
+	} else if m.cursor >= m.start+visibleRows {
+		m.start = m.cursor - visibleRows + 1
+	}
+	m.start = tuishell.Clamp(m.start, 0, max(0, len(m.rows)-visibleRows))
+	m.end = tuishell.Clamp(m.start+visibleRows, 0, len(m.rows))
+
+	renderedRows := make([]string, 0, m.end-m.start)
 	for i := m.start; i < m.end; i++ {
 		renderedRows = append(renderedRows, m.renderRow(i))
 	}
@@ -265,29 +273,12 @@ func (m *Model) UpdateViewport() {
 
 func (m *Model) MoveUp(n int) {
 	m.cursor = tuishell.Clamp(m.cursor-n, 0, len(m.rows)-1)
-	switch {
-	case m.start == 0:
-		m.viewport.SetYOffset(tuishell.Clamp(m.viewport.YOffset(), 0, m.cursor))
-	case m.start < m.viewport.Height():
-		m.viewport.SetYOffset(tuishell.Clamp(tuishell.Clamp(m.viewport.YOffset()+n, 0, m.cursor), 0, m.viewport.Height()))
-	case m.viewport.YOffset() >= 1:
-		m.viewport.SetYOffset(tuishell.Clamp(m.viewport.YOffset()+n, 1, m.viewport.Height()))
-	}
 	m.UpdateViewport()
 }
 
 func (m *Model) MoveDown(n int) {
 	m.cursor = tuishell.Clamp(m.cursor+n, 0, len(m.rows)-1)
 	m.UpdateViewport()
-	switch {
-	case m.end == len(m.rows) && m.viewport.YOffset() > 0:
-		m.viewport.SetYOffset(tuishell.Clamp(m.viewport.YOffset()-n, 1, m.viewport.Height()))
-	case m.cursor > (m.end-m.start)/2 && m.viewport.YOffset() > 0:
-		m.viewport.SetYOffset(tuishell.Clamp(m.viewport.YOffset()-n, 1, m.cursor))
-	case m.viewport.YOffset() > 1:
-	case m.cursor > m.viewport.YOffset()+m.viewport.Height()-1:
-		m.viewport.SetYOffset(tuishell.Clamp(m.viewport.YOffset()+1, 0, 1))
-	}
 }
 
 func (m *Model) GotoTop()    { m.MoveUp(m.cursor) }
