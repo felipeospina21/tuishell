@@ -7,9 +7,13 @@ type FocusedPanel uint
 
 // Panel focus constants.
 const (
+// LeftPanel indicates the left (navigation) panel has focus.
 	LeftPanel FocusedPanel = iota
+	// MainPanel indicates the main (content) panel has focus.
 	MainPanel
+	// RightPanel indicates the right (details) panel has focus.
 	RightPanel
+	// ModalPanel indicates the modal overlay has focus.
 	ModalPanel
 )
 

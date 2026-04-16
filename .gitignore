@@ -1,4 +1,5 @@
 tuishell
+example/example
 *.exe
 *.test
 *.out

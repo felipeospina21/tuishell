@@ -170,12 +170,23 @@ func (m Model) RenderView() tea.View {
 
 // --- Accessors ---
 
-func (m Model) IsLeftOpen() bool        { return m.isLeftOpen }
-func (m Model) IsRightOpen() bool       { return m.isRightOpen }
+// IsLeftOpen reports whether the left panel is visible.
+func (m Model) IsLeftOpen() bool { return m.isLeftOpen }
+
+// IsRightOpen reports whether the right panel is visible.
+func (m Model) IsRightOpen() bool { return m.isRightOpen }
+
+// IsRightFullscreen reports whether the right panel is in fullscreen mode.
 func (m Model) IsRightFullscreen() bool { return m.isRightFullscreen }
-func (m Model) IsModalOpen() bool       { return m.isModalOpen }
-func (m Model) TaskErr() error          { return m.taskErr }
-func (m Model) Theme() style.Theme      { return m.theme }
+
+// IsModalOpen reports whether the modal overlay is visible.
+func (m Model) IsModalOpen() bool { return m.isModalOpen }
+
+// TaskErr returns the error from the last completed task, or nil.
+func (m Model) TaskErr() error { return m.taskErr }
+
+// Theme returns the theme used by this shell.
+func (m Model) Theme() style.Theme { return m.theme }
 
 // --- Internal ---
 

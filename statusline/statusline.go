@@ -55,10 +55,12 @@ func New(theme style.Theme, devMode bool, keybinds help.KeyMap) Model {
 	}
 }
 
+// Init returns nil; the statusline has no initial command.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles window resize messages to adjust the statusline width.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.Width = msg.Width
@@ -66,6 +68,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
+// View renders the status bar with mode indicator, spinner, help, and project label.
 func (m Model) View() string {
 	t := m.theme
 	width := m.Width
