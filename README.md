@@ -1,5 +1,7 @@
 # tuishell
 
+![screenshot](docs/assets/tuishell_logo.png)
+
 A reusable 3-panel TUI framework for [Bubble Tea](https://github.com/charmbracelet/bubbletea) applications.
 
 tuishell handles the common infrastructure of panel-based terminal UIs: layout computation, panel routing, modal overlays, statusline, task management, and global keybindings — so you can focus on your domain logic.
@@ -50,7 +52,7 @@ type app struct {
 
 func newApp() tea.Model {
     theme := style.DefaultTheme()
-    
+
     leftStyle := lipgloss.NewStyle().
         PaddingRight(2).
         Border(lipgloss.NormalBorder(), false, true, false, false).
@@ -97,7 +99,7 @@ cd example && go run .
 ## Used By
 
 - [mrglab](https://github.com/felipeospina21/mrglab) — GitLab merge requests TUI
-- [mrjira](https://github.com/felipeospina21/mrjira) — Jira issues TUI
+- [jiraf](https://github.com/felipeospina21/jiraf) — Jira issues TUI
 
 ## License
 
