@@ -2,6 +2,12 @@
 
 ![screenshot](docs/assets/tuishell_logo.png)
 
+[![Go Version](https://img.shields.io/github/go-mod/go-version/felipeospina21/tuishell)](https://github.com/felipeospina21/tuishell)
+[![License](https://img.shields.io/github/license/felipeospina21/tuishell)](https://github.com/felipeospina21/tuishell/blob/main/LICENSE)
+[![Release](https://img.shields.io/github/v/release/felipeospina21/tuishell)](https://github.com/felipeospina21/tuishell/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/felipeospina21/tuishell/ci.yml?label=CI)](https://github.com/felipeospina21/tuishell/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/felipeospina21/tuishell)](https://goreportcard.com/report/github.com/felipeospina21/tuishell)
+
 A reusable 3-panel TUI framework for [Bubble Tea](https://github.com/charmbracelet/bubbletea) applications.
 
 tuishell handles the common infrastructure of panel-based terminal UIs: layout computation, panel routing, modal overlays, statusline, task management, and global keybindings — so you can focus on your domain logic.
