@@ -1,4 +1,4 @@
-module github.com/felipeospina21/tuishell/example
+module github.com/felipeospina21/tuishell/shell/example
 
 go 1.26.1
 
@@ -29,4 +29,4 @@ require (
 	golang.org/x/sys v0.42.0 // indirect
 )
 
-replace github.com/felipeospina21/tuishell => ../
+replace github.com/felipeospina21/tuishell => ../../
