@@ -4,3 +4,4 @@ example/example
 *.test
 *.out
 .DS_Store
+shell/example/example

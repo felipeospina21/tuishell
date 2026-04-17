@@ -66,6 +66,42 @@ type CopyModalMsg struct{}
 // ResetHighlightMsg signals that the modal highlight should be cleared.
 type ResetHighlightMsg struct{}
 
+// --- Popover messages ---
+
+// ListPopoverItem represents a selectable item in a list popover.
+type ListPopoverItem struct {
+	Label string
+	Value string
+}
+
+// OpenInputPopoverMsg tells the shell to open an input popover.
+type OpenInputPopoverMsg struct {
+	Header      string
+	Placeholder string
+}
+
+// CloseInputPopoverMsg tells the shell to close the input popover.
+type CloseInputPopoverMsg struct{}
+
+// SubmitInputPopoverMsg is returned when the user submits the input popover.
+type SubmitInputPopoverMsg struct {
+	Value string
+}
+
+// OpenListPopoverMsg tells the shell to open a list popover.
+type OpenListPopoverMsg struct {
+	Header string
+	Items  []ListPopoverItem
+}
+
+// CloseListPopoverMsg tells the shell to close the list popover.
+type CloseListPopoverMsg struct{}
+
+// SelectListPopoverMsg is returned when the user selects an item from the list popover.
+type SelectListPopoverMsg struct {
+	Value string
+}
+
 // SelectionProvider is implemented by panels that can provide a selected item label.
 type SelectionProvider interface {
 	SelectedLabel() string
