@@ -102,6 +102,23 @@ type SelectListPopoverMsg struct {
 	Value string
 }
 
+// OpenConfirmPopoverMsg tells the shell to open a confirmation popover.
+type OpenConfirmPopoverMsg struct {
+	Header  string
+	Message string
+	Confirm string
+	Cancel  string
+}
+
+// CloseConfirmPopoverMsg tells the shell to close the confirmation popover.
+type CloseConfirmPopoverMsg struct{}
+
+// ConfirmPopoverYesMsg is returned when the user confirms the popover.
+type ConfirmPopoverYesMsg struct{}
+
+// ConfirmPopoverNoMsg is returned when the user cancels the popover.
+type ConfirmPopoverNoMsg struct{}
+
 // SelectionProvider is implemented by panels that can provide a selected item label.
 type SelectionProvider interface {
 	SelectedLabel() string
