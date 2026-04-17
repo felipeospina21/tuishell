@@ -8,6 +8,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/felipeospina21/tuishell"
+	"github.com/felipeospina21/tuishell/clipboard"
 	"github.com/felipeospina21/tuishell/statusline"
 	"github.com/felipeospina21/tuishell/style"
 )
@@ -75,7 +76,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.Ctx.FocusedPanel = m.prevFocus
 
 	case tuishell.CopyModalMsg:
-		// Apps handle clipboard — forwarded via returned cmd
+		clipboard.CopyToClipboard(m.Modal.Content)
 
 	case tuishell.ResetHighlightMsg:
 		m.Modal.Highlight = false
@@ -88,6 +89,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tuishell.OpenRightPanelMsg:
 		if !m.isRightOpen {
 			m.isRightOpen = true
+			m.Ctx.FocusedPanel = tuishell.RightPanel
 			m.recomputeLayout()
 			cmds = append(cmds, m.pushSizeToPanels()...)
 		}
@@ -104,6 +106,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tuishell.CloseRightPanelMsg:
 		m.isRightOpen = false
 		m.isRightFullscreen = false
+		m.Ctx.FocusedPanel = tuishell.MainPanel
 		m.recomputeLayout()
 		cmds = append(cmds, m.pushSizeToPanels()...)
 
@@ -199,6 +202,20 @@ func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 	switch {
 	case match(gk.Quit):
 		return m, tea.Quit, true
+
+	case m.isRightOpen && match(gk.CloseRightPanel):
+		m.isRightOpen = false
+		m.isRightFullscreen = false
+		m.Ctx.FocusedPanel = tuishell.MainPanel
+		m.recomputeLayout()
+		cmds := m.pushSizeToPanels()
+		return m, tea.Batch(cmds...), true
+
+	case m.isRightOpen && match(gk.ToggleFullscreen):
+		m.isRightFullscreen = !m.isRightFullscreen
+		m.recomputeLayout()
+		cmds := m.pushSizeToPanels()
+		return m, tea.Batch(cmds...), true
 
 	case match(gk.ToggleLeftPanel):
 		m.isLeftOpen = !m.isLeftOpen

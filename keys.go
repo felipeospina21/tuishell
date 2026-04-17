@@ -7,17 +7,19 @@ import (
 
 // GlobalKeyMap defines the keybindings available in all panels.
 type GlobalKeyMap struct {
-	Help            key.Binding
-	Quit            key.Binding
-	ThrowError      key.Binding
-	MockFetch       key.Binding
-	ToggleLeftPanel key.Binding
-	OpenModal       key.Binding
+	Help             key.Binding
+	Quit             key.Binding
+	ThrowError       key.Binding
+	MockFetch        key.Binding
+	ToggleLeftPanel  key.Binding
+	OpenModal        key.Binding
+	CloseRightPanel  key.Binding
+	ToggleFullscreen key.Binding
 }
 
 // CommonKeys are the keybindings shown in every panel's help.
 var CommonKeys = []key.Binding{
-	GlobalKeys(false).ToggleLeftPanel, GlobalKeys(false).OpenModal, GlobalKeys(false).Help, GlobalKeys(false).Quit,
+	GlobalKeys(false).ToggleLeftPanel, GlobalKeys(false).OpenModal, GlobalKeys(false).CloseRightPanel, GlobalKeys(false).ToggleFullscreen, GlobalKeys(false).Help, GlobalKeys(false).Quit,
 }
 
 // DevKeys are additional keybindings shown in dev mode.
@@ -59,6 +61,14 @@ func GlobalKeys(devMode bool) GlobalKeyMap {
 		OpenModal: key.NewBinding(
 			key.WithKeys("@"),
 			key.WithHelp("@", "open full message modal"),
+		),
+		CloseRightPanel: key.NewBinding(
+			key.WithKeys("esc"),
+			key.WithHelp("esc", "close panel"),
+		),
+		ToggleFullscreen: key.NewBinding(
+			key.WithKeys("f"),
+			key.WithHelp("f", "fullscreen"),
 		),
 	}
 
