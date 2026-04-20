@@ -211,12 +211,6 @@ func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 		cmds := m.pushSizeToPanels()
 		return m, tea.Batch(cmds...), true
 
-	case m.isRightOpen && match(gk.ToggleFullscreen):
-		m.isRightFullscreen = !m.isRightFullscreen
-		m.recomputeLayout()
-		cmds := m.pushSizeToPanels()
-		return m, tea.Batch(cmds...), true
-
 	case match(gk.ToggleLeftPanel):
 		m.isLeftOpen = !m.isLeftOpen
 		if m.isRightOpen {
