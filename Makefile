@@ -26,3 +26,6 @@ endif
 	git push origin v$(v)
 	gh release create v$(v) --generate-notes --latest
 	@echo "Done. v$(v) released."
+
+version:
+	@git describe --tags --abbrev=0 2>/dev/null || echo 'no tags'
