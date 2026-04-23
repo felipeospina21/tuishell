@@ -21,7 +21,7 @@ const (
 // Embed this in your app-specific context to add domain fields.
 type AppContext struct {
 	Window       tea.WindowSizeMsg
-	DevMode      bool
+	DemoMode      bool
 	FocusedPanel FocusedPanel
 	PanelHeight  int
 }

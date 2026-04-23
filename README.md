@@ -20,7 +20,7 @@ tuishell handles the common infrastructure of panel-based terminal UIs: layout c
 - **Statusline** — mode indicator, project label, spinner, help keybindings
 - **Task management** — loading states with automatic spinner and error handling
 - **Theming** — 30 semantic color tokens, fully customizable
-- **Global keybindings** — help modal, quit, panel toggle, dev-mode keys
+- **Global keybindings** — help modal, quit, panel toggle, demo-mode keys
 
 ## Installation
 

@@ -21,7 +21,7 @@ type Config struct {
 	RightPanel      tea.Model      // optional
 	AppIcon         string         // e.g. "🎫" - shown in statusline, combined with selected item
 	Keybinds        help.KeyMap
-	DevMode         bool
+	DemoMode         bool
 	LeftPanelWidth  int            // default 30
 	LeftPanelStyle  lipgloss.Style
 	RightPanelStyle lipgloss.Style
@@ -77,8 +77,8 @@ func New(cfg Config) Model {
 			BorderForeground(t.Border)
 	}
 
-	ctx := tuishell.AppContext{FocusedPanel: tuishell.LeftPanel, DevMode: cfg.DevMode}
-	sl := statusline.New(t, cfg.DevMode, cfg.Keybinds)
+	ctx := tuishell.AppContext{FocusedPanel: tuishell.LeftPanel, DemoMode: cfg.DemoMode}
+	sl := statusline.New(t, cfg.DemoMode, cfg.Keybinds)
 	sl.ProjectLabel = cfg.AppIcon
 
 	return Model{

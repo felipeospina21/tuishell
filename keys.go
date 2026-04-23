@@ -21,7 +21,7 @@ var CommonKeys = []key.Binding{
 	GlobalKeys(false).ToggleLeftPanel, GlobalKeys(false).OpenModal, GlobalKeys(false).CloseRightPanel, GlobalKeys(false).Help, GlobalKeys(false).Quit,
 }
 
-// DevKeys are additional keybindings shown in dev mode.
+// DemoKeys are additional keybindings shown in demo mode.
 var DevKeys = []key.Binding{
 	GlobalKeys(true).ThrowError, GlobalKeys(true).MockFetch,
 }
@@ -42,8 +42,8 @@ func (k GlobalKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{CommonKeys}
 }
 
-// GlobalKeys returns the global keybindings, optionally including dev-mode keys.
-func GlobalKeys(devMode bool) GlobalKeyMap {
+// GlobalKeys returns the global keybindings, optionally including demo-mode keys.
+func GlobalKeys(demoMode bool) GlobalKeyMap {
 	keymap := GlobalKeyMap{
 		Help: key.NewBinding(
 			key.WithKeys("?"),
@@ -67,7 +67,7 @@ func GlobalKeys(devMode bool) GlobalKeyMap {
 		),
 	}
 
-	if devMode {
+	if demoMode {
 		keymap.ThrowError = key.NewBinding(
 			key.WithKeys("E"),
 			key.WithHelp("E", "throw error"),

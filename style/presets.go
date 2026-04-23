@@ -35,7 +35,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#45475a"),  // Surface1
 		StatusLoading: lipgloss.Color("#94e2d5"),  // Teal
 		StatusError:   lipgloss.Color("#f38ba8"),  // Red
-		StatusDev:     lipgloss.Color("#a6e3a1"),  // Green
+		StatusDemo:     lipgloss.Color("#a6e3a1"),  // Green
 		StatusAccent1: lipgloss.Color("#cba6f7"),  // Mauve
 		StatusAccent2: lipgloss.Color("#b4befe"),  // Lavender
 	},
@@ -71,7 +71,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#494d64"),  // Surface1
 		StatusLoading: lipgloss.Color("#8bd5ca"),  // Teal
 		StatusError:   lipgloss.Color("#ed8796"),  // Red
-		StatusDev:     lipgloss.Color("#a6da95"),  // Green
+		StatusDemo:     lipgloss.Color("#a6da95"),  // Green
 		StatusAccent1: lipgloss.Color("#c6a0f6"),  // Mauve
 		StatusAccent2: lipgloss.Color("#b7bdf8"),  // Lavender
 	},
@@ -107,7 +107,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#51576d"),  // Surface1
 		StatusLoading: lipgloss.Color("#81c8be"),  // Teal
 		StatusError:   lipgloss.Color("#e78284"),  // Red
-		StatusDev:     lipgloss.Color("#a6d189"),  // Green
+		StatusDemo:     lipgloss.Color("#a6d189"),  // Green
 		StatusAccent1: lipgloss.Color("#ca9ee6"),  // Mauve
 		StatusAccent2: lipgloss.Color("#babbf1"),  // Lavender
 	},
@@ -143,7 +143,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#bcc0cc"),  // Surface1
 		StatusLoading: lipgloss.Color("#179299"),  // Teal
 		StatusError:   lipgloss.Color("#d20f39"),  // Red
-		StatusDev:     lipgloss.Color("#40a02b"),  // Green
+		StatusDemo:     lipgloss.Color("#40a02b"),  // Green
 		StatusAccent1: lipgloss.Color("#8839ef"),  // Mauve
 		StatusAccent2: lipgloss.Color("#7287fd"),  // Lavender
 	},
@@ -179,7 +179,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#21202e"),  // Surface
 		StatusLoading: lipgloss.Color("#9ccfd8"),  // Foam
 		StatusError:   lipgloss.Color("#eb6f92"),  // Love
-		StatusDev:     lipgloss.Color("#3e8fb0"),  // Pine
+		StatusDemo:     lipgloss.Color("#3e8fb0"),  // Pine
 		StatusAccent1: lipgloss.Color("#c4a7e7"),  // Iris
 		StatusAccent2: lipgloss.Color("#ebbcba"),  // Rose
 	},
@@ -215,7 +215,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#292e42"),  // Bg Highlight
 		StatusLoading: lipgloss.Color("#73daca"),  // Teal
 		StatusError:   lipgloss.Color("#f7768e"),  // Red
-		StatusDev:     lipgloss.Color("#9ece6a"),  // Green
+		StatusDemo:     lipgloss.Color("#9ece6a"),  // Green
 		StatusAccent1: lipgloss.Color("#bb9af7"),  // Purple
 		StatusAccent2: lipgloss.Color("#7aa2f7"),  // Blue
 	},
@@ -251,7 +251,7 @@ var Presets = map[string]Theme{
 		StatusNormal:  lipgloss.Color("#44475a"),  // Current Line
 		StatusLoading: lipgloss.Color("#8be9fd"),  // Cyan
 		StatusError:   lipgloss.Color("#ff5555"),  // Red
-		StatusDev:     lipgloss.Color("#50fa7b"),  // Green
+		StatusDemo:     lipgloss.Color("#50fa7b"),  // Green
 		StatusAccent1: lipgloss.Color("#bd93f9"),  // Purple
 		StatusAccent2: lipgloss.Color("#ff79c6"),  // Pink
 	},

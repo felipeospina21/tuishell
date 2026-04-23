@@ -36,7 +36,7 @@ func defaultTheme() style.Theme {
 		StatusNormal:  lipgloss.Color("#6914ff"),
 		StatusLoading: lipgloss.Color("#1A7A94"),
 		StatusError:   lipgloss.Color("#CE3060"),
-		StatusDev:     lipgloss.Color("#4E8212"),
+		StatusDemo:     lipgloss.Color("#4E8212"),
 		StatusAccent1: lipgloss.Color("#A550DF"),
 		StatusAccent2: lipgloss.Color("#6124DF"),
 	}

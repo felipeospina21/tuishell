@@ -16,7 +16,7 @@ type Modes struct {
 	Normal  string
 	Loading string
 	Error   string
-	Dev     string
+	Demo    string
 }
 
 // ModesEnum contains the available status bar mode values.
@@ -24,7 +24,7 @@ var ModesEnum = Modes{
 	Normal:  "NORMAL",
 	Loading: "LOADING",
 	Error:   "ERROR",
-	Dev:     "DEVELOP",
+	Demo:    "DEMO",
 }
 
 // Model holds the state for the status bar.
@@ -36,21 +36,21 @@ type Model struct {
 	SpinnerView  string
 	Help         help.Model
 	Keybinds     help.KeyMap
-	devMode      bool
+	demoMode      bool
 	theme        style.Theme
 }
 
 // New creates a new status bar model.
-func New(theme style.Theme, devMode bool, keybinds help.KeyMap) Model {
+func New(theme style.Theme, demoMode bool, keybinds help.KeyMap) Model {
 	status := ModesEnum.Normal
-	if devMode {
-		status = ModesEnum.Dev
+	if demoMode {
+		status = ModesEnum.Demo
 	}
 	return Model{
 		Status:   status,
 		Keybinds: keybinds,
 		Help:     help.New(),
-		devMode:  devMode,
+		demoMode:  demoMode,
 		theme:    theme,
 	}
 }
@@ -115,8 +115,8 @@ func (m Model) modeBackground() color.Color {
 		return t.StatusLoading
 	case ModesEnum.Error:
 		return t.StatusError
-	case ModesEnum.Dev:
-		return t.StatusDev
+	case ModesEnum.Demo:
+		return t.StatusDemo
 	default:
 		return t.StatusNormal
 	}

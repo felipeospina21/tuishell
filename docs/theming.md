@@ -39,7 +39,7 @@ type Theme struct {
     StatusNormal  color.Color  // Normal mode background
     StatusLoading color.Color  // Loading mode background
     StatusError   color.Color  // Error mode background
-    StatusDev     color.Color  // Dev mode indicator
+    StatusDemo     color.Color  // Demo mode indicator
     StatusAccent1 color.Color  // Accent segment 1
     StatusAccent2 color.Color  // Accent segment 2
 }
@@ -82,7 +82,7 @@ myTheme := style.Theme{
     StatusNormal:  lipgloss.Color("#0052CC"),
     StatusLoading: lipgloss.Color("#0065FF"),
     StatusError:   lipgloss.Color("#FF5630"),
-    StatusDev:     lipgloss.Color("#36B37E"),
+    StatusDemo:     lipgloss.Color("#36B37E"),
     StatusAccent1: lipgloss.Color("#6554C0"),
     StatusAccent2: lipgloss.Color("#403294"),
 }
