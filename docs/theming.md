@@ -45,27 +45,15 @@ type Theme struct {
 }
 ```
 
-## Default Theme
+## Creating a Theme
 
-`style.DefaultTheme()` returns a violet-based theme (used by mrglab):
-
-```go
-theme := style.DefaultTheme()
-// Primary: Violet[300] (#a78bfa)
-// Success: Green[300]
-// Danger: Red[300]
-// etc.
-```
-
-## Custom Theme
-
-Create your own theme by defining all 30 tokens:
+Define all 30 tokens to create your theme:
 
 ```go
 import "charm.land/lipgloss/v2"
 
-jiraTheme := style.Theme{
-    Primary:       lipgloss.Color("#0052CC"),  // Jira blue
+myTheme := style.Theme{
+    Primary:       lipgloss.Color("#0052CC"),
     PrimaryBright: lipgloss.Color("#2684FF"),
     PrimaryFg:     lipgloss.Color("#FFFFFF"),
     PrimaryDim:    lipgloss.Color("#0747A6"),
@@ -99,23 +87,6 @@ jiraTheme := style.Theme{
     StatusAccent2: lipgloss.Color("#403294"),
 }
 ```
-
-## Color Palettes
-
-tuishell provides Tailwind-style color palettes for convenience:
-
-```go
-import "github.com/felipeospina21/tuishell/style"
-
-style.Blue[400]    // "#60a5fa"
-style.Red[500]     // "#ef4444"
-style.Green[300]   // "#86efac"
-style.Yellow[400]  // "#facc15"
-style.Violet[600]  // "#7c3aed"
-style.Orange[400]  // "#fb923c"
-```
-
-Each palette has shades: `50`, `100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900`.
 
 ## Using Theme in Components
 

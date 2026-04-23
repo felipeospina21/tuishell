@@ -72,7 +72,9 @@ func New(cfg Config) Model {
 		cfg.LeftPanelWidth = 30
 	}
 	if cfg.MainFrameStyle.GetWidth() == 0 {
-		cfg.MainFrameStyle = style.MainFrameStyle(t)
+		cfg.MainFrameStyle = lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(t.Border)
 	}
 
 	ctx := tuishell.AppContext{FocusedPanel: tuishell.LeftPanel, DevMode: cfg.DevMode}

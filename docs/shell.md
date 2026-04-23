@@ -25,7 +25,7 @@ type Config struct {
 | Option | Default |
 |--------|---------|
 | `LeftPanelWidth` | 30 |
-| `MainFrameStyle` | `style.MainFrameStyle(theme)` — normal border with `theme.Border` color |
+| `MainFrameStyle` | Normal border with `theme.Border` color |
 | `RightPanel` | `nil` (no right panel) |
 | `AppIcon` | `""` (empty statusline label) |
 | `DevMode` | `false` |
@@ -34,7 +34,7 @@ type Config struct {
 
 ```go
 s := shell.New(shell.Config{
-    Theme:          style.DefaultTheme(),
+    Theme:          myTheme,
     LeftPanel:      &myLeftPanel{},
     MainPanel:      &myMainPanel{},
     Keybinds:       tuishell.GlobalKeys(false),
@@ -45,7 +45,7 @@ s := shell.New(shell.Config{
 ## Full Example
 
 ```go
-theme := style.DefaultTheme()
+theme := myTheme()
 
 leftStyle := lipgloss.NewStyle().
     PaddingRight(2).

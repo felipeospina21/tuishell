@@ -15,11 +15,10 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/felipeospina21/tuishell"
 	"github.com/felipeospina21/tuishell/shell"
-	"github.com/felipeospina21/tuishell/style"
 	"github.com/felipeospina21/tuishell/table"
 )
 
-var theme = style.DefaultTheme()
+var theme = defaultTheme()
 
 func main() {
 	p := tea.NewProgram(newApp())

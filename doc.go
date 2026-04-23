@@ -20,7 +20,7 @@
 // Create panels that implement [tea.Model], then pass them to [shell.New]:
 //
 //	s := shell.New(shell.Config{
-//	    Theme:     style.DefaultTheme(),
+//	    Theme:     myTheme,
 //	    LeftPanel: &myLeftPanel{},
 //	    MainPanel: &myMainPanel{},
 //	    Keybinds:  tuishell.GlobalKeys(false),

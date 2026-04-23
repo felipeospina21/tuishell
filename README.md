@@ -57,7 +57,7 @@ type app struct {
 }
 
 func newApp() tea.Model {
-    theme := style.DefaultTheme()
+    theme := myTheme() // define your own style.Theme
 
     leftStyle := lipgloss.NewStyle().
         PaddingRight(2).
