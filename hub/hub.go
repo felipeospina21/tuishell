@@ -51,7 +51,7 @@ var backKey = key.NewBinding(
 
 // New creates a hub model from the given app entries.
 func New(apps []AppEntry) Model {
-	theme := style.DefaultTheme()
+	theme := defaultTheme()
 
 	items := make([]list.Item, len(apps))
 	for i, a := range apps {

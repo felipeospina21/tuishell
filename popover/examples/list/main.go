@@ -21,7 +21,7 @@ type model struct {
 }
 
 func newModel() model {
-	t := style.DefaultTheme()
+	t := defaultTheme()
 	return model{theme: t, list: popover.NewList(t)}
 }
 

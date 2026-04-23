@@ -33,10 +33,12 @@ type LayoutConfig struct {
 	StatuslineLines   int
 }
 
-// DefaultLayoutConfig returns a config using the default theme.
+// DefaultLayoutConfig returns a config using the given theme.
 func DefaultLayoutConfig(t style.Theme) LayoutConfig {
 	return LayoutConfig{
-		MainFrameStyle:  style.MainFrameStyle(t),
+		MainFrameStyle: lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(t.Border),
 		StatusBarStyle:  lipgloss.NewStyle().Margin(0, 0),
 		LeftPanelStyle:  lipgloss.NewStyle(),
 		RightPanelStyle: lipgloss.NewStyle(),
