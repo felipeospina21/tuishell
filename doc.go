@@ -13,7 +13,6 @@
 //   - [modal] — centered overlay modal with copy/submit actions
 //   - [statusline] — mode indicator, project label, spinner, help keybindings
 //   - [loader] — themed loading spinner
-//   - [hub] — app launcher for hosting multiple tuishell apps
 //
 // # Usage
 //
