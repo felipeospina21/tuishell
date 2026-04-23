@@ -34,7 +34,7 @@ type Theme struct {
 	StatusNormal  color.Color
 	StatusLoading color.Color
 	StatusError   color.Color
-	StatusDev     color.Color
+	StatusDemo    color.Color
 	StatusAccent1 color.Color
 	StatusAccent2 color.Color
 }

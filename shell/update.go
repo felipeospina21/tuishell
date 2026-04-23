@@ -51,8 +51,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.taskErr = msg.Err
 		} else {
 			mode := statusline.ModesEnum.Normal
-			if m.Ctx.DevMode {
-				mode = statusline.ModesEnum.Dev
+			if m.Ctx.DemoMode {
+				mode = statusline.ModesEnum.Demo
 			}
 			m.Statusline.Status = mode
 			m.Statusline.Content = ""
@@ -197,7 +197,7 @@ func (m Model) Theme() style.Theme { return m.theme }
 // When handled is true, the caller should return immediately.
 func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 	match := tuishell.KeyMatcher(msg)
-	gk := tuishell.GlobalKeys(m.Ctx.DevMode)
+	gk := tuishell.GlobalKeys(m.Ctx.DemoMode)
 
 	switch {
 	case match(gk.Quit):
@@ -240,12 +240,12 @@ func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 			}, true
 		}
 
-	case m.Ctx.DevMode && match(gk.ThrowError):
+	case m.Ctx.DemoMode && match(gk.ThrowError):
 		return m, func() tea.Msg {
 			return tuishell.FinishTaskMsg{Err: fmt.Errorf("simulated error for testing")}
 		}, true
 
-	case m.Ctx.DevMode && match(gk.MockFetch):
+	case m.Ctx.DemoMode && match(gk.MockFetch):
 		return m, func() tea.Msg {
 			return tuishell.StartTaskMsg{Cmd: func() tea.Msg {
 				time.Sleep(2 * time.Second)

@@ -12,7 +12,7 @@ type Config struct {
     RightPanel      tea.Model      // Optional: details panel
     AppIcon         string         // Optional: icon shown in statusline (e.g. "🎫")
     Keybinds        help.KeyMap    // Required: keybindings for help display
-    DevMode         bool           // Optional: enables dev-mode keys
+    DemoMode         bool           // Optional: enables demo-mode keys
     LeftPanelWidth  int            // Optional: default 30
     LeftPanelStyle  lipgloss.Style // Required: style for left panel border/padding
     RightPanelStyle lipgloss.Style // Optional: style for right panel
@@ -28,7 +28,7 @@ type Config struct {
 | `MainFrameStyle` | Normal border with `theme.Border` color |
 | `RightPanel` | `nil` (no right panel) |
 | `AppIcon` | `""` (empty statusline label) |
-| `DevMode` | `false` |
+| `DemoMode` | `false` |
 
 ## Minimal Example
 
@@ -64,8 +64,8 @@ s := shell.New(shell.Config{
     MainPanel:       &issuesPanel{},
     RightPanel:      &detailsPanel{},
     AppIcon:         "🦊",
-    Keybinds:        tuishell.GlobalKeys(cfg.DevMode),
-    DevMode:         cfg.DevMode,
+    Keybinds:        tuishell.GlobalKeys(cfg.DemoMode),
+    DemoMode:         cfg.DemoMode,
     LeftPanelWidth:  30,
     LeftPanelStyle:  leftStyle,
     RightPanelStyle: rightStyle,
