@@ -119,6 +119,45 @@ type ConfirmPopoverYesMsg struct{}
 // ConfirmPopoverNoMsg is returned when the user cancels the popover.
 type ConfirmPopoverNoMsg struct{}
 
+// --- Filter popover messages ---
+
+// FilterSection represents a group of checkable options in the filter popover.
+type FilterSection struct {
+	Title   string
+	Options []FilterOption
+}
+
+// FilterOption is a single checkable item in a filter section.
+type FilterOption struct {
+	Label    string
+	Value    string
+	Selected bool
+}
+
+// FilterInput represents a text input field in the filter popover.
+type FilterInput struct {
+	Title       string
+	Placeholder string
+	Value       string
+}
+
+// OpenFilterPopoverMsg tells the shell to open the filter popover.
+type OpenFilterPopoverMsg struct {
+	Sections []FilterSection
+	Inputs   []FilterInput
+}
+
+// CloseFilterPopoverMsg tells the shell to close the filter popover without applying.
+type CloseFilterPopoverMsg struct{}
+
+// ApplyFilterPopoverMsg is returned when the user applies the filter selections.
+// Selections maps section title to the list of selected option values.
+// Inputs maps input title to the entered value.
+type ApplyFilterPopoverMsg struct {
+	Selections map[string][]string
+	Inputs     map[string]string
+}
+
 // SelectionProvider is implemented by panels that can provide a selected item label.
 type SelectionProvider interface {
 	SelectedLabel() string
