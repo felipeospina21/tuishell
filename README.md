@@ -17,6 +17,7 @@ tuishell handles the common infrastructure of panel-based terminal UIs: layout c
 - **3-panel layout** — left (navigation), main (content), right (details) with automatic sizing
 - **Panel routing** — focus management and keyboard navigation between panels
 - **Modal overlay** — centered modal with copy/submit actions
+- **Popover components** — lightweight overlays: list picker, confirmation dialog, text input, multi-select filter with mixed checkbox/input fields
 - **Statusline** — mode indicator, project label, spinner, help keybindings
 - **Task management** — loading states with automatic spinner and error handling
 - **Theming** — 30 semantic color tokens, fully customizable
