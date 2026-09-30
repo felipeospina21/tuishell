@@ -78,7 +78,7 @@ func TestClickForwardsToTargetNotFocused(t *testing.T) {
 	m, left, main := newTestShell(t, true)
 	// Focus starts on left. Click the main panel: message must go to main,
 	// not the currently-focused left panel.
-	m, _ = m.Update(tea.MouseClickMsg(tea.Mouse{Button: tea.MouseLeft, X: 50, Y: 5}))
+	_, _ = m.Update(tea.MouseClickMsg(tea.Mouse{Button: tea.MouseLeft, X: 50, Y: 5}))
 
 	if left.gotMouse() {
 		t.Error("left (previously focused) panel should not receive a click aimed at main")
