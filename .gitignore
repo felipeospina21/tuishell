@@ -5,3 +5,4 @@ example/example
 *.out
 .DS_Store
 shell/example/example
+shell/example-mouse/example-mouse
