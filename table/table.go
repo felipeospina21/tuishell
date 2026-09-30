@@ -12,10 +12,27 @@ import (
 	"github.com/felipeospina21/tuishell"
 )
 
+// Row layout constants. Each rendered row occupies RowHeight content lines
+// plus RowBottomMargin blank lines below it. Consumers doing geometric
+// hit-testing should use RowPitch() rather than hardcoding these values.
 const (
-	rowBottomMargin = 1
-	rowHeight       = 1
+	// RowBottomMargin is the number of blank lines rendered below each row.
+	RowBottomMargin = 1
+	// RowHeight is the number of content lines occupied by a single row.
+	RowHeight = 1
+
+	// Deprecated: unexported aliases kept for internal readability.
+	rowBottomMargin = RowBottomMargin
+	rowHeight       = RowHeight
 )
+
+// ZoneManager is the minimal subset of a bubblezone *zone.Manager that the
+// table needs to mark rows as clickable. It is satisfied by
+// *github.com/lrstanley/bubblezone/v2.Manager without tuishell taking a hard
+// dependency on bubblezone. Mark wraps v in zero-width markers identified by id.
+type ZoneManager interface {
+	Mark(id, v string) string
+}
 
 // Model defines a state for the table widget.
 type Model struct {
@@ -24,12 +41,23 @@ type Model struct {
 	W            int
 	H            int
 
+	// AllowMouseWhenBlurred, when true, lets the table respond to mouse
+	// wheel and click events even while it does not have focus. Key events
+	// are always gated on focus. Defaults to false.
+	AllowMouseWhenBlurred bool
+
+	// RowID, when non-nil together with a ZoneManager set via SetZoneManager,
+	// returns a unique zone id for the row at the given index. Rows are then
+	// wrapped in zone markers so consumers can hit-test them with bubblezone.
+	RowID func(index int) string
+
 	cols      []Column
 	rows      []Row
 	cursor    int
 	focus     bool
 	styles    Styles
 	styleFunc StyleFunc
+	zone      ZoneManager
 
 	viewport viewport.Model
 	start    int
@@ -172,6 +200,20 @@ func WithStyleFunc(f StyleFunc) Option { return func(m *Model) { m.styleFunc = f
 // WithKeyMap sets the table keybindings.
 func WithKeyMap(km KeyMap) Option { return func(m *Model) { m.KeyMap = km } }
 
+// WithZoneManager sets a bubblezone manager used to mark rows as clickable.
+// Use together with WithRowID.
+func WithZoneManager(z ZoneManager) Option { return func(m *Model) { m.zone = z } }
+
+// WithRowID sets a hook returning a unique zone id for the row at index.
+// When set along with a ZoneManager, each row is wrapped in a zone marker.
+func WithRowID(fn func(index int) string) Option { return func(m *Model) { m.RowID = fn } }
+
+// WithAllowMouseWhenBlurred lets the table respond to mouse wheel and click
+// events even while unfocused. Key events remain gated on focus.
+func WithAllowMouseWhenBlurred(b bool) Option {
+	return func(m *Model) { m.AllowMouseWhenBlurred = b }
+}
+
 // WithHeight sets the height of the table.
 func WithHeight(h int) Option {
 	return func(m *Model) {
@@ -184,13 +226,16 @@ func WithWidth(w int) Option {
 	return func(m *Model) { m.viewport.SetWidth(w) }
 }
 
+// MouseWheelDelta is the number of rows the cursor moves per mouse wheel tick.
+const MouseWheelDelta = 1
+
 // Update is the Bubble Tea update loop.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	if !m.focus {
-		return m, nil
-	}
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		if !m.focus {
+			return m, nil
+		}
 		switch {
 		case key.Matches(msg, m.KeyMap.LineUp):
 			m.MoveUp(1)
@@ -209,9 +254,40 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.KeyMap.GotoBottom):
 			m.GotoBottom()
 		}
+
+	case tea.MouseWheelMsg:
+		if !m.mouseEnabled() {
+			return m, nil
+		}
+		switch msg.Button {
+		case tea.MouseWheelUp:
+			m.MoveUp(MouseWheelDelta)
+		case tea.MouseWheelDown:
+			m.MoveDown(MouseWheelDelta)
+		}
+
+	case tea.MouseClickMsg:
+		if !m.mouseEnabled() || msg.Button != tea.MouseLeft {
+			return m, nil
+		}
+		if row, ok := m.RowAt(msg.Y); ok {
+			m.SetCursor(row)
+		}
+
+	case tea.MouseReleaseMsg:
+		if !m.mouseEnabled() || msg.Button != tea.MouseLeft {
+			return m, nil
+		}
+		if row, ok := m.RowAt(msg.Y); ok {
+			m.SetCursor(row)
+		}
 	}
 	return m, nil
 }
+
+// mouseEnabled reports whether the table should process mouse events given its
+// current focus state and the AllowMouseWhenBlurred option.
+func (m Model) mouseEnabled() bool { return m.focus || m.AllowMouseWhenBlurred }
 
 // Focused reports whether the table has focus.
 func (m Model) Focused() bool { return m.focus }
@@ -229,6 +305,7 @@ func (m Model) SelectedRow() Row {
 	}
 	return m.rows[m.cursor]
 }
+
 // Rows returns all table rows.
 func (m Model) Rows() []Row { return m.rows }
 
@@ -243,6 +320,59 @@ func (m Model) Width() int { return m.viewport.Width() }
 
 // Cursor returns the index of the currently selected row.
 func (m Model) Cursor() int { return m.cursor }
+
+// Start returns the index of the first visible row (the current scroll offset).
+func (m Model) Start() int { return m.start }
+
+// VisibleRange returns the [start, end) range of currently visible row indices.
+// end is exclusive.
+func (m Model) VisibleRange() (start, end int) { return m.start, m.end }
+
+// RowPitch returns the number of terminal lines each row occupies, including
+// its bottom margin (RowHeight + RowBottomMargin). Use this instead of
+// hardcoding the value when doing geometric hit-testing.
+func (m Model) RowPitch() int { return RowHeight + RowBottomMargin }
+
+// HeaderHeight returns the number of terminal lines occupied by the header
+// area above the first row within View(), including the separator line.
+// A click at a Y coordinate (relative to the table View origin) less than
+// HeaderHeight() falls on the header, not a row.
+func (m Model) HeaderHeight() int {
+	if len(m.rows) == 0 {
+		return 0
+	}
+	// View() renders headersView() + "\n" + viewport, so the separator adds one line.
+	return lipgloss.Height(m.headersView()) + 1
+}
+
+// RowAt maps a Y coordinate, relative to the top-left origin of this table's
+// View() output, to a row index. It returns (index, true) when the coordinate
+// falls on a currently visible row, or (0, false) otherwise (e.g. the header,
+// a between-row margin, or empty space below the last row).
+func (m Model) RowAt(y int) (int, bool) {
+	if len(m.rows) == 0 {
+		return 0, false
+	}
+	rel := y - m.HeaderHeight()
+	if rel < 0 {
+		return 0, false
+	}
+	pitch := m.RowPitch()
+	// Reject clicks that land on the bottom margin between rows.
+	if rel%pitch >= RowHeight {
+		return 0, false
+	}
+	idx := m.start + rel/pitch
+	if idx < m.start || idx >= m.end {
+		return 0, false
+	}
+	return idx, true
+}
+
+// SetZoneManager sets the bubblezone manager used to mark rows as clickable.
+// Combined with RowID (see WithRowID), each rendered row is wrapped in a zone
+// marker. Passing nil disables zone marking.
+func (m *Model) SetZoneManager(z ZoneManager) { m.zone = z; m.UpdateViewport() }
 
 // SetRows replaces the table rows and updates the viewport.
 func (m *Model) SetRows(r []Row) { m.rows = r; m.UpdateViewport() }
@@ -383,8 +513,22 @@ func (m *Model) renderRow(r int) string {
 	}
 
 	row := lipgloss.JoinHorizontal(lipgloss.Left, s...)
+
+	var rendered string
 	if r == m.cursor {
-		return m.styles.Selected.MarginBottom(rowBottomMargin).Render(row)
+		rendered = m.styles.Selected.MarginBottom(rowBottomMargin).Render(row)
+	} else {
+		rendered = lipgloss.NewStyle().MarginBottom(rowBottomMargin).Render(row)
 	}
-	return lipgloss.NewStyle().MarginBottom(rowBottomMargin).Render(row)
+
+	// Wrap the fully-rendered outer row in a zone marker so bubblezone can
+	// hit-test it. Marking the outer string (rather than inner cells) keeps
+	// the markers away from the per-cell MaxWidth hard-trims that would
+	// otherwise corrupt them.
+	if m.zone != nil && m.RowID != nil {
+		if id := m.RowID(r); id != "" {
+			rendered = m.zone.Mark(id, rendered)
+		}
+	}
+	return rendered
 }

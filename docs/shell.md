@@ -17,8 +17,16 @@ type Config struct {
     LeftPanelStyle  lipgloss.Style // Required: style for left panel border/padding
     RightPanelStyle lipgloss.Style // Optional: style for right panel
     MainFrameStyle  lipgloss.Style // Optional: outer border style
+    EnableMouse     bool           // Optional: enable mouse mode + coordinate routing / click-to-focus
+    FixedPanels     bool           // Optional: always-open 3-column layout; panels can't be closed
+    FocusedBorderColor color.Color // Optional: active-panel border color (defaults to Theme.Primary)
+    LeftButtonLabel  string        // Optional: left toggle-button label (default "nav")
+    RightButtonLabel string        // Optional: right toggle-button label (default "details")
 }
 ```
+
+See [Mouse Support](mouse.md) for details on `EnableMouse`, `FixedPanels`, the
+toggle buttons, the panel-cycle keybind, and the active-panel indicator.
 
 ## Defaults
 
@@ -29,6 +37,11 @@ type Config struct {
 | `RightPanel` | `nil` (no right panel) |
 | `AppIcon` | `""` (empty statusline label) |
 | `DemoMode` | `false` |
+| `EnableMouse` | `false` |
+| `FixedPanels` | `false` |
+| `FocusedBorderColor` | `Theme.Primary` |
+| `LeftButtonLabel` | `"nav"` |
+| `RightButtonLabel` | `"details"` |
 
 ## Minimal Example
 
