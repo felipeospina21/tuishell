@@ -3,6 +3,8 @@
 package shell
 
 import (
+	"image/color"
+
 	"charm.land/bubbles/v2/help"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
@@ -18,14 +20,38 @@ type Config struct {
 	Theme           style.Theme
 	LeftPanel       tea.Model
 	MainPanel       tea.Model
-	RightPanel      tea.Model      // optional
-	AppIcon         string         // e.g. "🎫" - shown in statusline, combined with selected item
+	RightPanel      tea.Model // optional
+	AppIcon         string    // e.g. "🎫" - shown in statusline, combined with selected item
 	Keybinds        help.KeyMap
-	DemoMode         bool
-	LeftPanelWidth  int            // default 30
+	DemoMode        bool
+	LeftPanelWidth  int // default 30
 	LeftPanelStyle  lipgloss.Style
 	RightPanelStyle lipgloss.Style
 	MainFrameStyle  lipgloss.Style
+
+	// EnableMouse makes RenderView() enable tea.MouseModeCellMotion in
+	// addition to AltScreen, and makes Update() route mouse messages to the
+	// panel under the pointer (with click-to-focus). Defaults to false.
+	EnableMouse bool
+
+	// FixedPanels lays out the left, main, and right panels as three
+	// always-visible columns. The panels start open and cannot be closed:
+	// CloseLeftPanelMsg, CloseRightPanelMsg, ToggleFullscreenMsg, and the
+	// global toggle/close keybinds become no-ops. Independent of EnableMouse
+	// (a fixed layout is useful for keyboard-only apps too). Defaults to false.
+	FixedPanels bool
+
+	// FocusedBorderColor is the border color applied to the currently focused
+	// panel as an active-panel indicator. When nil, the shell falls back to
+	// Theme.Primary. Works whether or not mouse support is enabled.
+	FocusedBorderColor color.Color
+
+	// LeftButtonLabel and RightButtonLabel set the text shown inside the
+	// mouse-mode toggle buttons (e.g. "nav", "details"). The shell wraps the
+	// label with brackets and a directional arrow indicating open/close. When
+	// empty they default to "nav" and "details" respectively.
+	LeftButtonLabel  string
+	RightButtonLabel string
 }
 
 // Model handles all common 3-panel TUI behavior.
@@ -48,13 +74,18 @@ type Model struct {
 	leftPanelWidth  int
 	appIcon         string
 
-	isLeftOpen        bool
-	isRightOpen       bool
-	isRightFullscreen bool
-	isModalOpen       bool
-	taskStatus        taskStatus
-	taskErr           error
-	prevFocus         tuishell.FocusedPanel
+	isLeftOpen         bool
+	isRightOpen        bool
+	isRightFullscreen  bool
+	isModalOpen        bool
+	enableMouse        bool
+	fixedPanels        bool
+	focusedBorderColor color.Color
+	leftButtonLabel    string
+	rightButtonLabel   string
+	taskStatus         taskStatus
+	taskErr            error
+	prevFocus          tuishell.FocusedPanel
 }
 
 type taskStatus uint
@@ -81,6 +112,20 @@ func New(cfg Config) Model {
 	sl := statusline.New(t, cfg.DemoMode, cfg.Keybinds)
 	sl.ProjectLabel = cfg.AppIcon
 
+	focusColor := cfg.FocusedBorderColor
+	if focusColor == nil {
+		focusColor = t.Primary
+	}
+
+	leftLabel := cfg.LeftButtonLabel
+	if leftLabel == "" {
+		leftLabel = "nav"
+	}
+	rightLabel := cfg.RightButtonLabel
+	if rightLabel == "" {
+		rightLabel = "details"
+	}
+
 	return Model{
 		Left:  cfg.LeftPanel,
 		Main:  cfg.MainPanel,
@@ -101,7 +146,15 @@ func New(cfg Config) Model {
 		mainFrameStyle:  cfg.MainFrameStyle,
 		leftPanelWidth:  cfg.LeftPanelWidth,
 		isLeftOpen:      true,
-		taskStatus:      taskIdle,
+		// Fixed layout starts with the right panel open too and keeps both
+		// panels visible for the lifetime of the shell.
+		isRightOpen:        cfg.FixedPanels,
+		taskStatus:         taskIdle,
+		enableMouse:        cfg.EnableMouse,
+		fixedPanels:        cfg.FixedPanels,
+		focusedBorderColor: focusColor,
+		leftButtonLabel:    leftLabel,
+		rightButtonLabel:   rightLabel,
 	}
 }
 

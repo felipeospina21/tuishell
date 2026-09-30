@@ -22,6 +22,7 @@ tuishell handles the common infrastructure of panel-based terminal UIs: layout c
 - **Task management** — loading states with automatic spinner and error handling
 - **Theming** — 30 semantic color tokens, fully customizable
 - **Global keybindings** — help modal, quit, panel toggle, demo-mode keys
+- **Mouse support** — opt-in click-to-focus, wheel scroll, coordinate routing, and bubblezone-friendly table rows
 
 ## Installation
 
@@ -94,6 +95,7 @@ func (m app) View() tea.View { return m.shell.RenderView() }
 - [Messages](docs/messages.md) — Shell messages for panel-to-shell communication
 - [Theming](docs/theming.md) — Color tokens and custom themes
 - [Panels](docs/panels.md) — Creating panels and the SelectionProvider interface
+- [Mouse Support](docs/mouse.md) — Click-to-focus, wheel scroll, and bubblezone row hit-testing
 
 ## Example
 
@@ -101,6 +103,12 @@ Run the included example:
 
 ```bash
 cd example && go run .
+```
+
+Or try the mouse-support demo (click-to-focus, wheel scroll, bubblezone rows):
+
+```bash
+cd shell/example-mouse && go run .
 ```
 
 ## Used By

@@ -14,11 +14,13 @@ type GlobalKeyMap struct {
 	ToggleLeftPanel key.Binding
 	OpenModal       key.Binding
 	CloseRightPanel key.Binding
+	CyclePanel      key.Binding
+	CyclePanelBack  key.Binding
 }
 
 // CommonKeys are the keybindings shown in every panel's help.
 var CommonKeys = []key.Binding{
-	GlobalKeys(false).ToggleLeftPanel, GlobalKeys(false).OpenModal, GlobalKeys(false).CloseRightPanel, GlobalKeys(false).Help, GlobalKeys(false).Quit,
+	GlobalKeys(false).CyclePanel, GlobalKeys(false).ToggleLeftPanel, GlobalKeys(false).OpenModal, GlobalKeys(false).CloseRightPanel, GlobalKeys(false).Help, GlobalKeys(false).Quit,
 }
 
 // DemoKeys are additional keybindings shown in demo mode.
@@ -64,6 +66,14 @@ func GlobalKeys(demoMode bool) GlobalKeyMap {
 		CloseRightPanel: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "close panel"),
+		),
+		CyclePanel: key.NewBinding(
+			key.WithKeys("tab"),
+			key.WithHelp("tab", "next panel"),
+		),
+		CyclePanelBack: key.NewBinding(
+			key.WithKeys("shift+tab"),
+			key.WithHelp("shift+tab", "prev panel"),
 		),
 	}
 
