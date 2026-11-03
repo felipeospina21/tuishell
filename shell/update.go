@@ -222,26 +222,23 @@ func (m Model) View() string {
 	var left, main, right string
 	l := m.Layout
 
-	// Active-panel indicator: recolor the focused panel's border. The left
-	// panel carries its own (consumer-supplied) border; the main panel's
-	// indicator is the outer frame border. The right panel renders its own
-	// content (and border) as before, so its focus indicator is left to the
-	// consumer's own view via Ctx.FocusedPanel. Recoloring never changes
-	// width, so layout math is unaffected. Works with or without mouse support.
+	// Active-panel indicator: each panel is rendered as an independent box with
+	// its own (consumer-supplied) style; the focused panel's border is
+	// recolored via focusBorder. There is no outer frame — the consumer decides
+	// each panel's border (or absence of one). Recoloring never changes width,
+	// so layout math is unaffected. Works with or without mouse support.
 	leftStyle := m.focusBorder(m.leftPanelStyle, tuishell.LeftPanel)
-	frameStyle := m.focusBorder(m.mainFrameStyle, tuishell.MainPanel)
+	mainStyle := m.focusBorder(m.mainPanelStyle, tuishell.MainPanel)
+	rightStyle := m.focusBorder(m.rightPanelStyle, tuishell.RightPanel)
 
 	if m.isLeftOpen && !m.isRightFullscreen && m.Left != nil {
-		left = leftStyle.Height(l.LeftPanel.Height).Render(m.Left.View().Content)
+		left = leftStyle.Width(l.LeftPanel.Width).Height(l.LeftPanel.Height).Render(m.Left.View().Content)
 	}
 	if !m.isRightFullscreen && m.Main != nil {
-		main = lipgloss.NewStyle().
-			Width(l.MainPanel.Width).
-			Height(l.MainPanel.Height).
-			Render(m.Main.View().Content)
+		main = mainStyle.Width(l.MainPanel.Width).Height(l.MainPanel.Height).Render(m.Main.View().Content)
 	}
 	if m.isRightOpen && m.Right != nil {
-		right = m.Right.View().Content
+		right = rightStyle.Width(l.RightPanel.Width).Height(l.RightPanel.Height).Render(m.Right.View().Content)
 	}
 
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, main, right)
@@ -252,7 +249,7 @@ func (m Model) View() string {
 	}
 
 	sl := m.Statusline.View()
-	screen := frameStyle.Render(lipgloss.JoinVertical(lipgloss.Left, body, sl))
+	screen := lipgloss.JoinVertical(lipgloss.Left, body, sl)
 
 	if m.isModalOpen {
 		screen = m.Modal.View(screen)
@@ -431,7 +428,7 @@ func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 
 func (m *Model) recomputeLayout() {
 	cfg := tuishell.LayoutConfig{
-		MainFrameStyle:  m.mainFrameStyle,
+		MainPanelStyle:  m.mainPanelStyle,
 		StatusBarStyle:  statusline.StatusBarStyle(),
 		LeftPanelStyle:  m.leftPanelStyle,
 		RightPanelStyle: m.rightPanelStyle,

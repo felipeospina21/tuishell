@@ -36,7 +36,11 @@ type Config struct {
 	LeftPanelWidth  int // default 30
 	LeftPanelStyle  lipgloss.Style
 	RightPanelStyle lipgloss.Style
-	MainFrameStyle  lipgloss.Style
+	// MainPanelStyle is the main panel's own style/border. Each panel (left,
+	// main, right) is rendered as an independent box using its own style;
+	// tuishell imposes no outer frame. Leave borders off for a seamless look,
+	// or set a full border per panel — the consumer decides.
+	MainPanelStyle lipgloss.Style
 
 	// EnableMouse makes RenderView() enable tea.MouseModeCellMotion in
 	// addition to AltScreen, and makes Update() route mouse messages to the
@@ -79,7 +83,7 @@ type Model struct {
 	theme           style.Theme
 	leftPanelStyle  lipgloss.Style
 	rightPanelStyle lipgloss.Style
-	mainFrameStyle  lipgloss.Style
+	mainPanelStyle  lipgloss.Style
 	leftPanelWidth  int
 	appIcon         string
 
@@ -115,11 +119,6 @@ func New(cfg Config) Model {
 	t := cfg.Theme
 	if cfg.LeftPanelWidth == 0 {
 		cfg.LeftPanelWidth = 30
-	}
-	if cfg.MainFrameStyle.GetWidth() == 0 {
-		cfg.MainFrameStyle = lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder()).
-			BorderForeground(t.Border)
 	}
 
 	ctx := tuishell.AppContext{FocusedPanel: tuishell.LeftPanel, DemoMode: cfg.DemoMode}
@@ -175,7 +174,7 @@ func New(cfg Config) Model {
 		appIcon:         cfg.AppIcon,
 		leftPanelStyle:  cfg.LeftPanelStyle,
 		rightPanelStyle: cfg.RightPanelStyle,
-		mainFrameStyle:  cfg.MainFrameStyle,
+		mainPanelStyle:  cfg.MainPanelStyle,
 		leftPanelWidth:  cfg.LeftPanelWidth,
 		isLeftOpen:      true,
 		// Fixed layout starts with the right panel open too and keeps both

@@ -48,7 +48,7 @@ func newTestShell(t *testing.T, enableMouse bool) (Model, *fakePanel, *fakePanel
 		Keybinds:       tuishell.GlobalKeys(false),
 		LeftPanelWidth: 30,
 		LeftPanelStyle: lipgloss.NewStyle(),
-		MainFrameStyle: lipgloss.NewStyle(), // zero frame => origin (0,0)
+		MainPanelStyle: lipgloss.NewStyle(), // zero frame => origin (0,0)
 		EnableMouse:    enableMouse,
 	})
 	// Establish a known layout: left [0,30), main [30,120).
