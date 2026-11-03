@@ -367,11 +367,11 @@ func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 	case match(gk.Quit):
 		return m, tea.Quit, true
 
-	case match(gk.CyclePanel):
+	case match(m.cyclePanel):
 		m.Ctx.FocusedPanel = m.nextVisiblePanel(m.Ctx.FocusedPanel, true)
 		return m, nil, true
 
-	case match(gk.CyclePanelBack):
+	case match(m.cyclePanelBack):
 		m.Ctx.FocusedPanel = m.nextVisiblePanel(m.Ctx.FocusedPanel, false)
 		return m, nil, true
 

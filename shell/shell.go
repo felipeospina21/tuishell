@@ -6,6 +6,7 @@ import (
 	"image/color"
 
 	"charm.land/bubbles/v2/help"
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -24,6 +25,14 @@ type Config struct {
 	AppIcon         string    // e.g. "🎫" - shown in statusline, combined with selected item
 	Keybinds        help.KeyMap
 	DemoMode        bool
+
+	// CyclePanelKeys and CyclePanelBackKeys override the keys that cycle panel
+	// focus forward (left→main→right) and backward across the currently-open
+	// panels. When empty they default to "tab" and "shift+tab" respectively.
+	// Override these when the consumer needs "tab" for in-panel tab switching
+	// so the global focus-cycle can live on a non-conflicting key.
+	CyclePanelKeys     []string
+	CyclePanelBackKeys []string
 	LeftPanelWidth  int // default 30
 	LeftPanelStyle  lipgloss.Style
 	RightPanelStyle lipgloss.Style
@@ -86,6 +95,11 @@ type Model struct {
 	taskStatus         taskStatus
 	taskErr            error
 	prevFocus          tuishell.FocusedPanel
+
+	// cyclePanel / cyclePanelBack are the resolved focus-cycle keybindings,
+	// built from Config overrides or the tab/shift+tab defaults.
+	cyclePanel     key.Binding
+	cyclePanelBack key.Binding
 }
 
 type taskStatus uint
@@ -126,6 +140,24 @@ func New(cfg Config) Model {
 		rightLabel = "details"
 	}
 
+	// Resolve the focus-cycle keybindings: use the consumer overrides when
+	// provided, else fall back to the global tab/shift+tab defaults.
+	defaults := tuishell.GlobalKeys(cfg.DemoMode)
+	cyclePanel := defaults.CyclePanel
+	if len(cfg.CyclePanelKeys) > 0 {
+		cyclePanel = key.NewBinding(
+			key.WithKeys(cfg.CyclePanelKeys...),
+			key.WithHelp(cfg.CyclePanelKeys[0], "next panel"),
+		)
+	}
+	cyclePanelBack := defaults.CyclePanelBack
+	if len(cfg.CyclePanelBackKeys) > 0 {
+		cyclePanelBack = key.NewBinding(
+			key.WithKeys(cfg.CyclePanelBackKeys...),
+			key.WithHelp(cfg.CyclePanelBackKeys[0], "prev panel"),
+		)
+	}
+
 	return Model{
 		Left:  cfg.LeftPanel,
 		Main:  cfg.MainPanel,
@@ -155,6 +187,8 @@ func New(cfg Config) Model {
 		focusedBorderColor: focusColor,
 		leftButtonLabel:    leftLabel,
 		rightButtonLabel:   rightLabel,
+		cyclePanel:         cyclePanel,
+		cyclePanelBack:     cyclePanelBack,
 	}
 }
 
