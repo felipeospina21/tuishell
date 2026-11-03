@@ -28,7 +28,7 @@ func newShell(t *testing.T, cfg Config) (Model, *fakePanel, *fakePanel, *fakePan
 		cfg.LeftPanelWidth = 30
 	}
 	cfg.LeftPanelStyle = lipgloss.NewStyle()
-	cfg.MainFrameStyle = lipgloss.NewStyle()
+	cfg.MainPanelStyle = lipgloss.NewStyle()
 	m := New(cfg)
 	m, _ = m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
 	return m, left, main, right

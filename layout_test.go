@@ -9,7 +9,7 @@ import (
 
 func zeroFrameConfig(leftPanelWidth, statuslineLines int) LayoutConfig {
 	return LayoutConfig{
-		MainFrameStyle:  lipgloss.NewStyle(),
+		MainPanelStyle:  lipgloss.NewStyle(),
 		StatusBarStyle:  lipgloss.NewStyle(),
 		LeftPanelStyle:  lipgloss.NewStyle(),
 		RightPanelStyle: lipgloss.NewStyle(),
@@ -128,8 +128,10 @@ func TestComputeLayout_ZeroWindow(t *testing.T) {
 	if got.ContentH != -1 {
 		t.Errorf("ContentH = %d, want -1", got.ContentH)
 	}
-	if got.MainPanel.Width != -30 {
-		t.Errorf("MainPanel.Width = %d, want -30", got.MainPanel.Width)
+	// Main's on-screen total goes negative (left panel wider than the window),
+	// but content width clamps at 0 rather than going negative.
+	if got.MainPanel.Width != 0 {
+		t.Errorf("MainPanel.Width = %d, want 0 (clamped)", got.MainPanel.Width)
 	}
 }
 
@@ -202,7 +204,7 @@ func TestPanelAt_ZeroFrame(t *testing.T) {
 func TestPanelAt_BorderedFrame(t *testing.T) {
 	win := tea.WindowSizeMsg{Width: 120, Height: 40}
 	cfg := LayoutConfig{
-		MainFrameStyle:  lipgloss.NewStyle().Border(lipgloss.NormalBorder()),
+		MainPanelStyle:  lipgloss.NewStyle().Border(lipgloss.NormalBorder()),
 		StatusBarStyle:  lipgloss.NewStyle(),
 		LeftPanelStyle:  lipgloss.NewStyle(),
 		RightPanelStyle: lipgloss.NewStyle(),
@@ -211,22 +213,30 @@ func TestPanelAt_BorderedFrame(t *testing.T) {
 	}
 	l := ComputeLayout(win, cfg, true, false, false)
 
-	// A 1-cell border pushes content origin to (1,1).
-	if l.LeftRect.X != 1 || l.LeftRect.Y != 1 {
-		t.Errorf("LeftRect origin = (%d,%d), want (1,1)", l.LeftRect.X, l.LeftRect.Y)
+	// The left panel is borderless, so its content is flush at the origin.
+	if l.LeftRect.X != 0 || l.LeftRect.Y != 0 {
+		t.Errorf("LeftRect origin = (%d,%d), want (0,0)", l.LeftRect.X, l.LeftRect.Y)
 	}
-	// Main starts after the left panel width.
-	if l.MainRect.X != 1+l.LeftPanel.Width {
-		t.Errorf("MainRect.X = %d, want %d", l.MainRect.X, 1+l.LeftPanel.Width)
+	// The main panel carries its own 1-cell border, so its content origin is
+	// pushed in by one cell on each axis, after the left panel's full width.
+	if l.MainRect.X != l.LeftPanel.Width+1 {
+		t.Errorf("MainRect.X = %d, want %d", l.MainRect.X, l.LeftPanel.Width+1)
+	}
+	if l.MainRect.Y != 1 {
+		t.Errorf("MainRect.Y = %d, want 1", l.MainRect.Y)
 	}
 
-	// A click at the border origin (0,0) hits no panel.
-	if _, _, _, ok := l.PanelAt(0, 0); ok {
-		t.Error("PanelAt(0,0) on border should not hit a panel")
+	// A click at the left panel's origin (0,0) hits the left panel.
+	if p, lx, ly, ok := l.PanelAt(0, 0); !ok || p != LeftPanel || lx != 0 || ly != 0 {
+		t.Errorf("PanelAt(0,0) = (%d,%d,%d,%v), want (LeftPanel,0,0,true)", p, lx, ly, ok)
 	}
-	// A click just inside the border hits the left panel at local (0,0).
-	if p, lx, ly, ok := l.PanelAt(1, 1); !ok || p != LeftPanel || lx != 0 || ly != 0 {
-		t.Errorf("PanelAt(1,1) = (%d,%d,%d,%v), want (LeftPanel,0,0,true)", p, lx, ly, ok)
+	// A click on the main panel's border column (just after the left panel)
+	// hits no panel; one cell further in hits the main panel at local (0,0).
+	if _, _, _, ok := l.PanelAt(l.LeftPanel.Width, 0); ok {
+		t.Error("PanelAt on main's border column should not hit a panel")
+	}
+	if p, lx, ly, ok := l.PanelAt(l.LeftPanel.Width+1, 1); !ok || p != MainPanel || lx != 0 || ly != 0 {
+		t.Errorf("PanelAt(main content origin) = (%d,%d,%d,%v), want (MainPanel,0,0,true)", p, lx, ly, ok)
 	}
 }
 

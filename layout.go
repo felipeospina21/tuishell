@@ -12,6 +12,14 @@ type PanelSize struct {
 	Height int
 }
 
+// clampNonNeg returns n, or 0 when n is negative.
+func clampNonNeg(n int) int {
+	if n < 0 {
+		return 0
+	}
+	return n
+}
+
 // PanelRect holds the absolute on-screen position and size of a panel region,
 // in terminal cell coordinates. X/Y are the zero-based coordinates of the
 // top-left cell of the panel's content area (inside any frame border).
@@ -87,9 +95,11 @@ func (l Layout) PanelAt(x, y int) (panel FocusedPanel, localX, localY int, ok bo
 }
 
 // LayoutConfig provides the frame sizes needed to compute the layout.
-// These come from the styles of the consuming app's panels.
+// These come from the styles of the consuming app's panels. Each panel is laid
+// out as an independent box using its own style; tuishell imposes no outer
+// frame. The consumer decides each panel's border (or lack of one).
 type LayoutConfig struct {
-	MainFrameStyle  lipgloss.Style
+	MainPanelStyle  lipgloss.Style
 	StatusBarStyle  lipgloss.Style
 	LeftPanelStyle  lipgloss.Style
 	RightPanelStyle lipgloss.Style
@@ -117,7 +127,7 @@ type LayoutConfig struct {
 // DefaultLayoutConfig returns a config using the given theme.
 func DefaultLayoutConfig(t style.Theme) LayoutConfig {
 	return LayoutConfig{
-		MainFrameStyle: lipgloss.NewStyle().
+		MainPanelStyle: lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			BorderForeground(t.Border),
 		StatusBarStyle:  lipgloss.NewStyle().Margin(0, 0),
@@ -128,7 +138,11 @@ func DefaultLayoutConfig(t style.Theme) LayoutConfig {
 	}
 }
 
-// ComputeLayout calculates panel dimensions from the window size and panel state.
+// ComputeLayout calculates panel dimensions from the window size and panel
+// state. Each panel is an independent box laid out left→main→right with its own
+// style/border; there is no outer frame. The returned PanelSize widths/heights
+// are CONTENT sizes (what each panel should render into, before its own border
+// is added). The statusline spans the full width below the panel row.
 func ComputeLayout(win tea.WindowSizeMsg, cfg LayoutConfig, leftOpen, rightOpen, rightFullscreen bool) Layout {
 	// Fixed-panels mode forces both side panels open and disables fullscreen.
 	if cfg.FixedPanels {
@@ -137,76 +151,94 @@ func ComputeLayout(win tea.WindowSizeMsg, cfg LayoutConfig, leftOpen, rightOpen,
 		rightFullscreen = false
 	}
 
-	mainFrameX, mainFrameY := cfg.MainFrameStyle.GetFrameSize()
-
-	innerW := win.Width - mainFrameX
-	innerH := win.Height - mainFrameY
+	// Per-panel frame sizes (border + padding + margin) from each style.
+	leftFX, leftFY := cfg.LeftPanelStyle.GetFrameSize()
+	mainFX, mainFY := cfg.MainPanelStyle.GetFrameSize()
+	rightFX, rightFY := cfg.RightPanelStyle.GetFrameSize()
 
 	slFrameY := cfg.StatusBarStyle.GetVerticalFrameSize()
 	slH := cfg.StatuslineLines + slFrameY
 	slFrameX := cfg.StatusBarStyle.GetHorizontalFrameSize()
-
-	contentH := innerH - slH
 
 	// Reserve one row at the top for the mouse-mode toggle button bar.
 	barH := 0
 	if cfg.ButtonBar {
 		barH = 1
 	}
-	panelsH := contentH - barH
+	// Total height available to the panel row (on-screen, including borders).
+	panelsTotalH := win.Height - slH - barH
 
-	leftW := 0
+	// Total on-screen widths (content + own frame) for each panel.
+	leftTotal := 0
 	if leftOpen && !rightFullscreen {
-		leftW = cfg.LeftPanelWidth + cfg.LeftPanelStyle.GetHorizontalFrameSize()
+		leftTotal = cfg.LeftPanelWidth + leftFX
 	}
 
-	mainW := innerW - leftW
-	rightW := 0
-	detailsFrameX := cfg.RightPanelStyle.GetHorizontalFrameSize()
+	rightTotal := 0
+	mainTotal := win.Width - leftTotal
 	switch {
 	case rightOpen && rightFullscreen:
-		mainW = 0
-		rightW = innerW - detailsFrameX
+		mainTotal = 0
+		rightTotal = win.Width
 	case rightOpen:
-		// Three-column split: divide the space remaining after the left panel
-		// (leftW is 0 when the left panel is closed) between main and right.
-		// Covers fixed mode, left-closed (two-column), and left+right both open.
-		rightW = mainW/2 - detailsFrameX
-		mainW = mainW - rightW - detailsFrameX
+		// Split the space remaining after the left panel between main and
+		// right (leftTotal is 0 when the left panel is closed). Covers fixed
+		// mode, left-closed, and left+right both open.
+		rightTotal = mainTotal / 2
+		mainTotal = mainTotal - rightTotal
 	}
 
-	leftH := panelsH - cfg.LeftPanelStyle.GetVerticalFrameSize()
+	// Convert on-screen totals to content sizes by subtracting each panel's
+	// own frame. Clamp at 0 so a panel narrower than its frame never goes
+	// negative.
+	leftW := clampNonNeg(leftTotal - leftFX)
+	if leftTotal == 0 {
+		leftW = 0
+	}
+	mainW := clampNonNeg(mainTotal - mainFX)
+	if mainTotal == 0 {
+		mainW = 0
+	}
+	rightW := clampNonNeg(rightTotal - rightFX)
+	if rightTotal == 0 {
+		rightW = 0
+	}
 
-	// Absolute origins for hit-testing. The main frame's left/top border and
-	// padding push the body content inward; panels are laid out left→main→right.
-	originX := cfg.MainFrameStyle.GetMarginLeft() +
-		cfg.MainFrameStyle.GetBorderLeftSize() +
-		cfg.MainFrameStyle.GetPaddingLeft()
-	originY := cfg.MainFrameStyle.GetMarginTop() +
-		cfg.MainFrameStyle.GetBorderTopSize() +
-		cfg.MainFrameStyle.GetPaddingTop()
+	leftH := clampNonNeg(panelsTotalH - leftFY)
+	mainH := clampNonNeg(panelsTotalH - mainFY)
+	rightH := clampNonNeg(panelsTotalH - rightFY)
 
-	// The button bar occupies the first content row; panels start below it.
-	panelsY := originY + barH
+	// Absolute origins for hit-testing. Panels sit flush left→right with no
+	// outer frame; the button bar (when shown) occupies the first row. Each
+	// panel's content area is offset inward by that panel's own left border +
+	// left padding.
+	panelsY := barH
+	leftContentY := panelsY + cfg.LeftPanelStyle.GetBorderTopSize() + cfg.LeftPanelStyle.GetPaddingTop()
+	mainContentY := panelsY + cfg.MainPanelStyle.GetBorderTopSize() + cfg.MainPanelStyle.GetPaddingTop()
+	rightContentY := panelsY + cfg.RightPanelStyle.GetBorderTopSize() + cfg.RightPanelStyle.GetPaddingTop()
 
-	leftRect := PanelRect{X: originX, Y: panelsY, Width: leftW, Height: leftH}
-	mainRect := PanelRect{X: originX + leftW, Y: panelsY, Width: mainW, Height: panelsH}
-	rightRect := PanelRect{X: originX + leftW + mainW, Y: panelsY, Width: rightW, Height: panelsH}
+	leftContentX := cfg.LeftPanelStyle.GetBorderLeftSize() + cfg.LeftPanelStyle.GetPaddingLeft()
+	mainContentX := leftTotal + cfg.MainPanelStyle.GetBorderLeftSize() + cfg.MainPanelStyle.GetPaddingLeft()
+	rightContentX := leftTotal + mainTotal + cfg.RightPanelStyle.GetBorderLeftSize() + cfg.RightPanelStyle.GetPaddingLeft()
+
+	leftRect := PanelRect{X: leftContentX, Y: leftContentY, Width: leftW, Height: leftH}
+	mainRect := PanelRect{X: mainContentX, Y: mainContentY, Width: mainW, Height: mainH}
+	rightRect := PanelRect{X: rightContentX, Y: rightContentY, Width: rightW, Height: rightH}
 
 	l := Layout{
 		Window:     win,
 		LeftPanel:  PanelSize{Width: leftW, Height: leftH},
-		MainPanel:  PanelSize{Width: mainW, Height: panelsH},
-		RightPanel: PanelSize{Width: rightW, Height: panelsH},
-		Statusline: PanelSize{Width: innerW - slFrameX, Height: slH},
-		ContentH:   panelsH,
+		MainPanel:  PanelSize{Width: mainW, Height: mainH},
+		RightPanel: PanelSize{Width: rightW, Height: rightH},
+		Statusline: PanelSize{Width: win.Width - slFrameX, Height: slH},
+		ContentH:   panelsTotalH,
 		LeftRect:   leftRect,
 		MainRect:   mainRect,
 		RightRect:  rightRect,
 	}
 
 	if cfg.ButtonBar {
-		l.ButtonBarRect = PanelRect{X: originX, Y: originY, Width: innerW, Height: 1}
+		l.ButtonBarRect = PanelRect{X: 0, Y: 0, Width: win.Width, Height: 1}
 		// Widths come from the shell, which measures the rendered glyphs so the
 		// hit-rects track the consumer-configured labels. Fall back to sane
 		// defaults if unset.
@@ -218,8 +250,8 @@ func ComputeLayout(win tea.WindowSizeMsg, cfg LayoutConfig, leftOpen, rightOpen,
 		if rightBtnW <= 0 {
 			rightBtnW = 13
 		}
-		l.LeftToggleRect = PanelRect{X: originX, Y: originY, Width: leftBtnW, Height: 1}
-		l.RightToggleRect = PanelRect{X: originX + innerW - rightBtnW, Y: originY, Width: rightBtnW, Height: 1}
+		l.LeftToggleRect = PanelRect{X: 0, Y: 0, Width: leftBtnW, Height: 1}
+		l.RightToggleRect = PanelRect{X: win.Width - rightBtnW, Y: 0, Width: rightBtnW, Height: 1}
 	}
 
 	return l
