@@ -60,6 +60,18 @@ func TestComputeLayout(t *testing.T) {
 			wantContentH:   39,
 		},
 		{
+			name:           "left and right both open",
+			leftOpen:       true,
+			rightOpen:      true,
+			// After the 30-wide left panel, 90 remains; split between main and
+			// right. Right must have real width (regression: was 0).
+			wantLeft:       PanelSize{Width: 30, Height: 39},
+			wantMain:       PanelSize{Width: 45, Height: 39},
+			wantRight:      PanelSize{Width: 45, Height: 39},
+			wantStatusline: PanelSize{Width: 120, Height: 1},
+			wantContentH:   39,
+		},
+		{
 			name:            "right fullscreen",
 			rightOpen:       true,
 			rightFullscreen: true,
