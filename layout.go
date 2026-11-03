@@ -167,12 +167,10 @@ func ComputeLayout(win tea.WindowSizeMsg, cfg LayoutConfig, leftOpen, rightOpen,
 	case rightOpen && rightFullscreen:
 		mainW = 0
 		rightW = innerW - detailsFrameX
-	case cfg.FixedPanels && rightOpen:
-		// Three-column layout: split the space remaining after the left panel
-		// between main and right.
-		rightW = mainW/2 - detailsFrameX
-		mainW = mainW - rightW - detailsFrameX
-	case rightOpen && !leftOpen:
+	case rightOpen:
+		// Three-column split: divide the space remaining after the left panel
+		// (leftW is 0 when the left panel is closed) between main and right.
+		// Covers fixed mode, left-closed (two-column), and left+right both open.
 		rightW = mainW/2 - detailsFrameX
 		mainW = mainW - rightW - detailsFrameX
 	}
