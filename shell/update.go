@@ -231,14 +231,23 @@ func (m Model) View() string {
 	mainStyle := m.focusBorder(m.mainPanelStyle, tuishell.MainPanel)
 	rightStyle := m.focusBorder(m.rightPanelStyle, tuishell.RightPanel)
 
+	// lipgloss .Width()/.Height() set the TOTAL box size (border drawn inside
+	// the budget), while Layout carries CONTENT sizes. Add each style's own
+	// frame back so the content area matches the computed content size and the
+	// box's outer size matches the slot ComputeLayout reserved for it.
+	sized := func(s lipgloss.Style, cw, ch int) lipgloss.Style {
+		fx, fy := s.GetFrameSize()
+		return s.Width(cw + fx).Height(ch + fy)
+	}
+
 	if m.isLeftOpen && !m.isRightFullscreen && m.Left != nil {
-		left = leftStyle.Width(l.LeftPanel.Width).Height(l.LeftPanel.Height).Render(m.Left.View().Content)
+		left = sized(leftStyle, l.LeftPanel.Width, l.LeftPanel.Height).Render(m.Left.View().Content)
 	}
 	if !m.isRightFullscreen && m.Main != nil {
-		main = mainStyle.Width(l.MainPanel.Width).Height(l.MainPanel.Height).Render(m.Main.View().Content)
+		main = sized(mainStyle, l.MainPanel.Width, l.MainPanel.Height).Render(m.Main.View().Content)
 	}
 	if m.isRightOpen && m.Right != nil {
-		right = rightStyle.Width(l.RightPanel.Width).Height(l.RightPanel.Height).Render(m.Right.View().Content)
+		right = sized(rightStyle, l.RightPanel.Width, l.RightPanel.Height).Render(m.Right.View().Content)
 	}
 
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, main, right)
