@@ -208,3 +208,46 @@ func cycleKey() tea.KeyPressMsg     { return tea.KeyPressMsg{Code: tea.KeyTab} }
 func cycleBackKey() tea.KeyPressMsg { return tea.KeyPressMsg{Code: tea.KeyTab, Mod: tea.ModShift} }
 
 var _ = keyPress // keyPress kept for potential future text-key tests
+
+// TestPanelCycle_ConfigurableKeys verifies that overriding the cycle keys moves
+// the focus-cycle onto a custom key and that the default "tab" no longer cycles
+// (so the consumer can reuse tab for in-panel tab switching).
+func TestPanelCycle_ConfigurableKeys(t *testing.T) {
+	m, _, _, _ := newShell(t, Config{
+		FixedPanels:        true, // all three panels open
+		CyclePanelKeys:     []string{"ctrl+l"},
+		CyclePanelBackKeys: []string{"ctrl+h"},
+	})
+	m.Ctx.FocusedPanel = tuishell.LeftPanel
+
+	// The custom forward key cycles: left -> main.
+	ctrlL := tea.KeyPressMsg{Code: 'l', Mod: tea.ModCtrl}
+	m, _, handled := m.handleGlobalKeys(ctrlL)
+	if !handled {
+		t.Fatal("ctrl+l should be handled as the cycle key")
+	}
+	if m.FocusedPanel() != tuishell.MainPanel {
+		t.Fatalf("after ctrl+l focus = %d, want MainPanel", m.FocusedPanel())
+	}
+
+	// The custom back key cycles: main -> left.
+	ctrlH := tea.KeyPressMsg{Code: 'h', Mod: tea.ModCtrl}
+	m, _, handled = m.handleGlobalKeys(ctrlH)
+	if !handled {
+		t.Fatal("ctrl+h should be handled as the cycle-back key")
+	}
+	if m.FocusedPanel() != tuishell.LeftPanel {
+		t.Fatalf("after ctrl+h focus = %d, want LeftPanel", m.FocusedPanel())
+	}
+
+	// The default tab must NOT cycle when overridden — it falls through
+	// unhandled so the consumer can route it to in-panel tab switching.
+	before := m.FocusedPanel()
+	m, _, handled = m.handleGlobalKeys(cycleKey())
+	if handled {
+		t.Error("tab should not be handled as cycle when keys are overridden")
+	}
+	if m.FocusedPanel() != before {
+		t.Errorf("tab changed focus (%d -> %d) despite override", before, m.FocusedPanel())
+	}
+}
