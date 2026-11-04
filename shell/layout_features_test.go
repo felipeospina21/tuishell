@@ -251,3 +251,28 @@ func TestPanelCycle_ConfigurableKeys(t *testing.T) {
 		t.Errorf("tab changed focus (%d -> %d) despite override", before, m.FocusedPanel())
 	}
 }
+
+func TestHelpKeyOpensScrollableSingleColumnModal(t *testing.T) {
+	m, _, _, _ := newShell(t, Config{})
+
+	m, cmd := m.Update(tea.KeyPressMsg{Code: '?', Text: "?"})
+	if cmd == nil {
+		t.Fatal("? should produce an OpenModalMsg command")
+	}
+	open, ok := cmd().(tuishell.OpenModalMsg)
+	if !ok {
+		t.Fatalf("expected OpenModalMsg, got %T", cmd())
+	}
+	m, _ = m.Update(open)
+	if !m.IsModalOpen() {
+		t.Fatal("help modal should be open")
+	}
+	if !strings.Contains(open.Content, "toggle help") {
+		t.Errorf("help content missing global bindings:\n%s", open.Content)
+	}
+	for _, l := range strings.Split(open.Content, "\n") {
+		if strings.Contains(l, "toggle help") && strings.Contains(l, "quit") {
+			t.Errorf("bindings must be one per line, got %q", l)
+		}
+	}
+}

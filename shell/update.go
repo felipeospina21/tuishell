@@ -69,6 +69,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.Modal.Header = msg.Header
 		m.Modal.Content = msg.Content
 		m.Modal.IsError = msg.IsError
+		m.Modal.ResetScroll()
 		m.Modal.SetFocus()
 
 	case tuishell.CloseModalMsg:
@@ -405,7 +406,7 @@ func (m Model) handleGlobalKeys(msg tea.KeyPressMsg) (Model, tea.Cmd, bool) {
 		return m, tea.Batch(cmds...), true
 
 	case match(gk.Help):
-		content := m.Modal.RenderHelp(m.Statusline.Keybinds)
+		content := m.Modal.RenderHelpScrollable(m.Statusline.Keybinds)
 		return m, func() tea.Msg {
 			return tuishell.OpenModalMsg{Header: "Keybindings", Content: content}
 		}, true

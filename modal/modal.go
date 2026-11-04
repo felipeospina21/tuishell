@@ -16,6 +16,7 @@ type Model struct {
 	Content   string
 	Highlight bool
 	IsError   bool
+	scroll    int // first visible content line; see Scroll helpers in scroll.go
 	ctx       *tuishell.AppContext
 	theme     style.Theme
 }
@@ -48,9 +49,9 @@ func (m Model) View(background string) string {
 		header = hdrStyle.Background(t.StatusError).Width(modalW).Render(m.Header)
 	}
 	ftr := helpStyle(t)
-	footer := ftr.Render("esc close · ctrl+s submit · ctrl+y copy")
+	footerText := "esc close · ctrl+s submit · ctrl+y copy"
 	box := boxStyle(t)
-	contentH := max(modalH-lipgloss.Height(header)-lipgloss.Height(footer)-box.GetVerticalFrameSize(), 1)
+	contentH := max(modalH-lipgloss.Height(header)-lipgloss.Height(helpStyle(t).Render("X"))-box.GetVerticalFrameSize(), 1)
 	contentW := modalW - box.GetHorizontalFrameSize()
 
 	content := m.Content
@@ -61,11 +62,21 @@ func (m Model) View(background string) string {
 			Render(content)
 	}
 
+	// Wrap to the content width, then show only the scroll window.
+	lines := strings.Split(lipgloss.NewStyle().Width(contentW).Render(content), "\n")
+	maxScroll := max(len(lines)-contentH, 0)
+	offset := min(max(m.scroll, 0), maxScroll)
+	end := min(offset+contentH, len(lines))
+	if maxScroll > 0 {
+		footerText += " · j/k scroll"
+	}
+	footer := ftr.Render(footerText)
+
 	body := lipgloss.NewStyle().
 		Width(contentW).
 		Height(contentH).
 		MaxHeight(contentH).
-		Render(content)
+		Render(strings.Join(lines[offset:end], "\n"))
 
 	rendered := box.Width(modalW).Height(modalH).Render(
 		lipgloss.JoinVertical(0, header, body, footer),

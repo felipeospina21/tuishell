@@ -19,6 +19,9 @@ type (
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		if m.scrollKey(msg.String()) {
+			return m, nil
+		}
 		match := tuishell.KeyMatcher(msg)
 		switch {
 		case match(Keybinds.Close):
