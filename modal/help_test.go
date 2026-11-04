@@ -56,7 +56,7 @@ func TestRenderHelpScrollable_SingleColumnWithHeaders(t *testing.T) {
 	if g < 0 || n < 0 || h < 0 || a < 0 || r < 0 {
 		t.Fatalf("missing lines in output:\n%s", out)
 	}
-	if !(g < n && n < h && h < a && a < r) {
+	if g >= n || n >= h || h >= a || a >= r {
 		t.Errorf("groups not stacked in order: %d %d %d %d %d", g, n, h, a, r)
 	}
 	if strings.TrimSpace(lines[a-1]) != "" {
